@@ -1,0 +1,8 @@
+{
+  "name": "custom-talisman-cards-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/custom-talisman-cards-e2e/src",
+  "implicitDependencies": ["custom-talisman-cards"],
+  "// targets": "to see all targets run: nx show project custom-talisman-cards-e2e --web",
+  "targets": {}
+}
