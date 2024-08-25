@@ -1,3 +1,3 @@
 <template>
-  <NxWelcome title="custom-talisman-cards" />
+  <Welcome title="custom-talisman-cards" />
 </template>
