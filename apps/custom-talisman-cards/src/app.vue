@@ -1,7 +1,9 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+
+</script>
 
 <template>
-  <main>
+  <main class="vvd-root">
     <header>
       
     </header>

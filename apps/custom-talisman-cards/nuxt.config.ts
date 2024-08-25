@@ -19,10 +19,17 @@ export default defineNuxtConfig({
   imports: {
     autoImport: true,
   },
-
-  css: ['~/assets/css/styles.css'],
+  css: [
+    '~/assets/css/styles.css', 
+    /*'@vonage/vivid/styles/core/all.css', 
+    '@vonage/vivid/styles/tokens/theme-light.css', 
+    '@vonage/vivid/styles/fonts/spezia-variable.css'*/
+  ],
 
   vite: {
     plugins: [nxViteTsPaths()],
   },
+  plugins: [
+    '~/plugins/vivid.client.ts', // only in client side
+  ]
 });

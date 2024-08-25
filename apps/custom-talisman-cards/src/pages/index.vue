@@ -1,3 +1,5 @@
 <template>
-  <Welcome title="custom-talisman-cards" />
+  <client-only>
+    <Welcome title="custom-talisman-cards" />
+  </client-only>
 </template>

@@ -4,7 +4,9 @@
   "license": "MIT",
   "scripts": {},
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "@vonage/vivid-vue": "^4.4.0"
+  },
   "devDependencies": {
     "@nuxt/devtools": "1.0.0",
     "@nuxt/eslint-config": "~0.3.6",

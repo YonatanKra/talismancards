@@ -1,7 +1,7 @@
 <template>
   <div class="editor-container">
     <div class="form-container">
-      <h1>Edit Talisman Card</h1>
+      <h1>Edit Talisman Card, {{ name }}</h1>
       
       <!-- Card Title -->
       <label for="cardTitle">Card Title:</label>
