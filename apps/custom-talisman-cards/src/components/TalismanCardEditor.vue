@@ -2,22 +2,47 @@
   <div class="editor-container">
     <div class="form-container">
       <h1>Edit Talisman Card, {{ name }}</h1>
-      
-      <!-- Card Title -->
-      <label for="cardTitle">Card Title:</label>
-      <input id="cardTitle" v-model="cardTitle" placeholder="Enter card title" />
 
-      <!-- Subtitle -->
-      <label for="cardSubtitle">Subtitle:</label>
-      <input id="cardSubtitle" v-model="cardSubtitle" placeholder="Enter subtitle" />
+      <form ref="editorForm">
+        <!-- Card Title -->
+        <vwc-text-field
+          name="cardTitle"
+          placeholder="כותרת"
+          value="כותרת"
+          @input="updateSVG"
+        ></vwc-text-field>
 
-      <!-- Card Type -->
-      <label for="cardType">Card Type:</label>
-      <input id="cardType" v-model="cardType" placeholder="Enter card type" />
+        <!-- Subtitle -->
+        <vwc-text-field
+          name="cardSubtitle"
+          placeholder="תת כותרת"
+          value="תת כותרת"
+          @input="updateSVG"
+        ></vwc-text-field>
 
-      <!-- Description -->
-      <label for="cardDescription">Description:</label>
-      <textarea id="cardDescription" v-model="cardDescription" placeholder="Enter description"></textarea>
+        <!-- Card Type -->
+        <vwc-text-field
+          name="cardType"
+          placeholder="כותרת טקסט"
+          value="כותרת טקסט"
+          @input="updateSVG"
+        ></vwc-text-field>
+
+        <!-- Description -->
+        <vwc-text-area
+          name="cardDescription"
+          placeholder="טקסט"
+          value="טקסט"
+          @input="updateSVG"
+        ></vwc-text-area>
+
+        <input
+          type="file"
+          name="userImage"
+          @change="handleFileUpload"
+          accept="image/*"
+        />
+      </form>
     </div>
 
     <!-- Load SVG -->
@@ -33,21 +58,18 @@ import { ref, onMounted, watch } from 'vue';
 const props = defineProps({
   name: {
     type: String,
-    default: 'Guest'
+    default: 'Guest',
   },
   phone: {
     type: String,
-    default: 'N/A'
-  }
+    default: 'N/A',
+  },
 });
 
-// Reactive properties for card details
-const cardTitle = ref('');
-const cardSubtitle = ref('');
-const cardType = ref('');
-const cardDescription = ref('');
 const svgContent = ref('');
-const originalSVG = ref(''); // Store the original SVG template
+const originalSVG = ref('');
+const editorForm = ref<HTMLFormElement | null>(null);
+const uploadedImage = ref<string | null>(null); // Store uploaded image data
 
 // Load the SVG file
 const loadSVG = async () => {
@@ -59,58 +81,106 @@ const loadSVG = async () => {
   updateSVG();
 };
 
-// Update SVG content with dynamic text
+function parseDescription(cardDescription) {
+  const descriptionLines = cardDescription.split('\n');
+  const maxWidth = 325;
+  const maxLines = 7;
+  return descriptionLines
+    .map((line) => {
+      // Split the line into words
+      const words = line.split(' ');
+      let currentLine = '';
+      let lines = [];
+
+      words.forEach((word) => {
+        const testLine = currentLine + word + ' ';
+        const textWidth = getTextWidth(testLine); // Function to calculate text width
+
+        if (textWidth > maxWidth) {
+          lines.push(currentLine.trim());
+          currentLine = word + ' '; // Start a new line with the current word
+        } else {
+          currentLine = testLine; // Continue adding to the current line
+        }
+      });
+
+      // Add the last line
+      if (currentLine) {
+        lines.push(currentLine.trim());
+      }
+
+      // Add ellipsis if the number of lines exceeds a certain limit
+      if (lines.length > maxLines) {
+        lines = lines.slice(0, 3); // Limit to 3 lines
+        lines[2] += '...'; // Add ellipsis to the last line
+      }
+
+      return lines
+        .map((line, index) => {
+          return `<tspan x="50%" dy="25" text-anchor="middle">${line}</tspan>`;
+        })
+        .join('');
+    })
+    .join('');
+}
+
+const handleFileUpload = (event: Event) => {
+  const fileInput = event.target as HTMLInputElement;
+  if (fileInput.files && fileInput.files[0]) {
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      uploadedImage.value = e.target?.result as string; // Store the Base64 image data
+      updateSVG(); // Update the SVG to include the uploaded image
+    };
+    reader.readAsDataURL(file); // Read the file as a data URL
+  }
+};
+
 const updateSVG = () => {
-  // Split the cardDescription into lines
-  const descriptionLines = cardDescription.value.split('\n');
-  
+  function getFormData() {
+    const formData = new FormData(editorForm.value);
+    const cardTitle = formData.get('cardTitle');
+    const cardSubtitle = formData.get('cardSubtitle');
+    const cardType = formData.get('cardType');
+    const cardDescription = formData.get('cardDescription');
+    return {
+      cardTitle,
+      cardSubtitle,
+      cardType,
+      cardDescription,
+    };
+  }
+
+  const { cardTitle, cardSubtitle, cardType, cardDescription } = getFormData();
+
   // Create a new SVG string with updated values
   let updatedSVG = originalSVG.value // Use the original SVG template
-    .replace(/{{cardTitle}}/g, cardTitle.value)
-    .replace(/{{cardSubtitle}}/g, cardSubtitle.value)
-    .replace(/{{cardType}}/g, cardType.value);
+    .replace(/{{cardTitle}}/g, cardTitle)
+    .replace(/{{cardSubtitle}}/g, cardSubtitle)
+    .replace(/{{cardType}}/g, cardType);
 
-  // Replace the placeholder for cardDescription with multiple lines
-  const maxWidth = 325; 
-  const maxLines = 7;
-  const descriptionSVG = descriptionLines.map((line) => {
-    // Split the line into words
-    const words = line.split(' ');
-    let currentLine = '';
-    let lines = [];
+  updatedSVG = updatedSVG.replace(
+    /{{cardDescription}}/g,
+    parseDescription(cardDescription)
+  );
 
-    words.forEach((word) => {
-      const testLine = currentLine + word + ' ';
-      const textWidth = getTextWidth(testLine); // Function to calculate text width
+  if (uploadedImage.value) {
+    updatedSVG = replaceImageInSVG(updatedSVG, uploadedImage.value, 'img4');
+  }
 
-      if (textWidth > maxWidth) {
-        lines.push(currentLine.trim());
-        currentLine = word + ' '; // Start a new line with the current word
-      } else {
-        currentLine = testLine; // Continue adding to the current line
-      }
-    });
-
-    // Add the last line
-    if (currentLine) {
-      lines.push(currentLine.trim());
-    }
-
-    // Add ellipsis if the number of lines exceeds a certain limit
-    if (lines.length > maxLines) {
-      lines = lines.slice(0, 3); // Limit to 3 lines
-      lines[2] += '...'; // Add ellipsis to the last line
-    }
-
-    return lines.map((line, index) => {
-      return `<tspan x="50%" dy="25" text-anchor="middle">${line}</tspan>`;
-    }).join('');
-  }).join('');
-
-  updatedSVG = updatedSVG.replace(/{{cardDescription}}/g, descriptionSVG);
-  
   svgContent.value = updatedSVG; // Update the displayed SVG
 };
+
+function replaceImageInSVG(svg, imgValue, imageId = 'img4') {
+    const div = document.createElement('div');
+    div.innerHTML = svg;
+    const image = div.querySelector(`#${imageId}`);
+    if (image) {
+        image.setAttribute('href', imgValue);
+    }
+    return div.innerHTML;
+}
 
 // Function to calculate text width
 const getTextWidth = (text) => {
@@ -119,9 +189,6 @@ const getTextWidth = (text) => {
   context.font = '16px Caxton BT'; // Use the same font as in the SVG
   return context.measureText(text).width;
 };
-
-// Watch for changes to card details and update SVG content
-watch([cardTitle, cardSubtitle, cardType, cardDescription], updateSVG);
 
 // Load SVG on component mount
 onMounted(loadSVG);
@@ -184,3 +251,6 @@ onMounted(loadSVG);
   }
 }
 </style>
+
+// TODO::upload picture // TODO::submit to server // TODO::display approved
+congrats // TODO::deploy // TODO::improve typing performance

@@ -1,6 +1,5 @@
 {
 	"devDependencies": {
-		"global-jsdom": "^24.0.0",
 		"jsdom": "^25.0.0"
 	},
 	"dependencies": {

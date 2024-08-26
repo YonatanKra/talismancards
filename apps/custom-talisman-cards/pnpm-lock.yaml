@@ -10,9 +10,6 @@ dependencies:
     version: 4.4.0
 
 devDependencies:
-  global-jsdom:
-    specifier: ^24.0.0
-    version: 24.0.0(jsdom@25.0.0)
   jsdom:
     specifier: ^25.0.0
     version: 25.0.0
@@ -91,15 +88,6 @@ packages:
       asynckit: 0.4.0
       combined-stream: 1.0.8
       mime-types: 2.1.35
-    dev: true
-
-  /global-jsdom@24.0.0(jsdom@25.0.0):
-    resolution: {integrity: sha512-CARBUWkqZ3O9VOc2PIVE5kQpdQeJh9eF9kQ7zSeNtmqx5vAFDKMr9XnDt1epVMMrz1s9uK/yFCa4HLwpa6TcPA==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      jsdom: '>=24 <25'
-    dependencies:
-      jsdom: 25.0.0
     dev: true
 
   /html-encoding-sniffer@4.0.0:
