@@ -252,5 +252,8 @@ onMounted(loadSVG);
 }
 </style>
 
-// TODO::upload picture // TODO::submit to server // TODO::display approved
-congrats // TODO::deploy // TODO::improve typing performance
+// TODO::submit to server 
+// TODO::display approved congrats
+// TODO::deploy 
+// TODO::edit picture 
+// TODO::improve typing performance

@@ -7,7 +7,13 @@ export default defineConfig({
   root: __dirname,
   cacheDir: '../../node_modules/.vite/apps/custom-talisman-cards',
 
-  plugins: [vue(), nxViteTsPaths()],
+  plugins: [vue({
+    template: {
+      compilerOptions: {
+        isCustomElement: (tag) => tag.startsWith('vwc-'),
+      }
+    }
+  }), nxViteTsPaths()],
 
   // Uncomment this if you are using workers.
   // worker: {
