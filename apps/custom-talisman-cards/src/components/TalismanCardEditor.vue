@@ -203,7 +203,7 @@ h1 {
 .editor-container {
   display: flex;
   flex-direction: column; /* Default to column for larger screens */
-  align-items: top; /* Center items */
+  align-items: flex-start; /* Center items */
   gap: 20px; /* Space between form and card */
 }
 
@@ -264,7 +264,7 @@ form {
 @media (min-width: 768px) {
   .editor-container {
     flex-direction: row; /* Side by side on larger screens */
-    justify-content: space-between; /* Space between form and card */
+    justify-content: center; /* Space between form and card */
   }
 
   .form-container {
