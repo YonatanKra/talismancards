@@ -1,6 +1,5 @@
 <template>
   <div class="editor">
-    <h1>This is an about page.</h1>
     <TalismanCardEditor :name="name" :phone="phone"/>
   </div>
 </template>

@@ -1,7 +1,7 @@
 <template>
   <div class="editor-container">
     <div class="form-container">
-      <h1>Edit Talisman Card, {{ name }}</h1>
+      <h1>היי {{ name }}, כאן יוצרים ברכת טאליסמן לאיתמר.</h1>
 
       <form ref="editorForm">
         <!-- Card Title -->
@@ -173,13 +173,13 @@ const updateSVG = () => {
 };
 
 function replaceImageInSVG(svg, imgValue, imageId = 'img4') {
-    const div = document.createElement('div');
-    div.innerHTML = svg;
-    const image = div.querySelector(`#${imageId}`);
-    if (image) {
-        image.setAttribute('href', imgValue);
-    }
-    return div.innerHTML;
+  const div = document.createElement('div');
+  div.innerHTML = svg;
+  const image = div.querySelector(`#${imageId}`);
+  if (image) {
+    image.setAttribute('href', imgValue);
+  }
+  return div.innerHTML;
 }
 
 // Function to calculate text width
@@ -195,6 +195,11 @@ onMounted(loadSVG);
 </script>
 
 <style scoped>
+h1 {
+  font-size: 18px;
+  direction: rtl;
+}
+
 .editor-container {
   display: flex;
   flex-direction: column; /* Default to column for larger screens */
@@ -207,6 +212,12 @@ onMounted(loadSVG);
   flex-direction: column;
   width: 100%;
   max-width: 400px; /* Limit width for form */
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  row-gap: 15px;
 }
 
 .card-preview {
@@ -237,6 +248,17 @@ onMounted(loadSVG);
   .editor-container {
     flex-direction: column; /* Change to row for mobile */
   }
+
+  h1 {
+    font-size: 16px;
+  }
+
+  form {
+    display: flex;
+    flex-direction: row;
+    column-gap: 10px;
+    flex-flow: wrap;
+  }
 }
 
 @media (min-width: 768px) {
@@ -259,8 +281,5 @@ onMounted(loadSVG);
 }
 </style>
 
-// TODO::submit to server 
-// TODO::display approved congrats
-// TODO::deploy 
-// TODO::edit picture 
-// TODO::improve typing performance
+// TODO::submit to server // TODO::display approved congrats // TODO::deploy //
+TODO::edit picture // TODO::improve typing performance
