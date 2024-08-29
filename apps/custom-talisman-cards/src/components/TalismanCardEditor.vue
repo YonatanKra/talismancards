@@ -197,7 +197,7 @@ onMounted(loadSVG);
 <style scoped>
 .editor-container {
   display: flex;
-  flex-direction: row; /* Stack on mobile */
+  flex-direction: column; /* Default to column for larger screens */
   align-items: top; /* Center items */
   gap: 20px; /* Space between form and card */
 }
@@ -230,6 +230,13 @@ onMounted(loadSVG);
   width: 100%; /* Make SVG responsive */
   height: auto; /* Maintain aspect ratio */
   max-height: 100%; /* Limit height to container */
+}
+
+/* Media query for mobile devices */
+@media (max-width: 768px) {
+  .editor-container {
+    flex-direction: column; /* Change to row for mobile */
+  }
 }
 
 @media (min-width: 768px) {
