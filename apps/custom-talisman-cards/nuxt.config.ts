@@ -31,5 +31,11 @@ export default defineNuxtConfig({
   },
   plugins: [
     '~/plugins/vivid.client.ts', // only in client side
-  ]
+  ],
+  nitro: {
+    preset: 'vercel',
+    output: {
+      dir: '../../.vercel/output',
+    },
+  },
 });
