@@ -42,6 +42,13 @@
           @change="handleFileUpload"
           accept="image/*"
         />
+
+        <vwc-button 
+          appearance="filled" 
+          connotation="cta" 
+          label="Upload SVG" 
+          @click="uploadSVG"
+        ></vwc-button>
       </form>
     </div>
 
@@ -54,6 +61,30 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
+
+const uploadSVG = async () => {
+  const svgBlob = new Blob([svgContent.value], { type: 'image/svg+xml' });
+  const svgDataUrl = URL.createObjectURL(svgBlob);
+  const fileName = `talisman_card_${Date.now()}.svg`; // Unique file name
+
+  const response = await fetch('/api/upload', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      imageData: svgDataUrl,
+      fileName,
+    }),
+  });
+
+  if (response.ok) {
+    const data = await response.json();
+    console.log('Upload Success', data);
+  } else {
+    console.error('Upload Failed');
+  }
+};
 
 const props = defineProps({
   name: {
