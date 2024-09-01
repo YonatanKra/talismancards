@@ -1,13 +1,15 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { readBody } from 'h3'
+import { defineEventHandler, readBody, setResponseStatus, assertMethod } from 'h3';
 
-export default async function (req, res) {
-  if (req.method === 'POST') {
-    const body = await readBody(req);
-    const { imageData, fileName } = body;
+export default defineEventHandler(async (event) => {
+  assertMethod(event, 'POST');
+  const body = await readBody(event);
+  
+  const { imageData, fileName } = body;
 
     if (!imageData || !fileName) {
-      return res.status(400).json({ error: 'Missing required fields' });
+      setResponseStatus(event, 400, 'Missing required fields');
+      return 'Missing required fields';
     }
 
     // Configure AWS S3
@@ -31,13 +33,12 @@ export default async function (req, res) {
     try {
       const command = new PutObjectCommand(params);
       const data = await s3Client.send(command);
-      res.status(200).json({ message: 'Upload successful', data });
+      setResponseStatus(event, 200, 'Upload successful');  
+      return JSON.stringify({message: 'Upload successful', data});
     } catch (error) {
       console.error('Upload Error', error);
-      res.status(500).json({ error: 'Upload failed' });
+      setResponseStatus(event, 500, JSON.stringify({message: 'Upload failed', error }));
+      return JSON.stringify({message: 'Upload failed', error });
     }
-  } else {
-    res.setHeader('Allow', ['POST']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
-}
+);

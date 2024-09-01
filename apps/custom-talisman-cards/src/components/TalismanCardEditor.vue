@@ -78,7 +78,7 @@ const uploadSVG = async () => {
     }),
   });
 
-  if (response.ok) {
+  if (response.ok) {    
     const data = await response.json();
     console.log('Upload Success', data);
   } else {
