@@ -1,8 +1,14 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { readBody } from 'h3'
 
 export default async function (req, res) {
   if (req.method === 'POST') {
-    const { imageData, fileName } = req.body;
+    const body = await readBody(req);
+    const { imageData, fileName } = body;
+
+    if (!imageData || !fileName) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
 
     // Configure AWS S3
     const s3Client = new S3Client({
