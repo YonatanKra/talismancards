@@ -1,18 +1,19 @@
-import { S3 } from '@aws-sdk/client-s3';
-import { fromIni } from '@aws-sdk/credential-provider-ini'; // Optional: Use if you want to load credentials from a config file
-import { APIGatewayEvent, Context } from 'aws-lambda';
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
-export default async function (req: APIGatewayEvent, res: Context) {
+export default async function (req, res) {
   if (req.method === 'POST') {
     const { imageData, fileName } = req.body;
 
     // Configure AWS S3
-    const s3 = new S3({
+    const s3Client = new S3Client({
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      },
       region: process.env.AWS_REGION,
-      credentials: fromIni({ profile: 'default' }) // Optional: Load credentials from AWS config file
     });
 
-    const buffer = Buffer.from(imageData.replace(/^data:image\/svg+xml;base64,/, ''), 'base64');
+    const buffer = Buffer.from(imageData.replace(/^data:image\/svg\+xml;base64,/, ''), 'base64');
 
     const params = {
       Bucket: process.env.AWS_BUCKET_NAME,
@@ -22,7 +23,8 @@ export default async function (req: APIGatewayEvent, res: Context) {
     };
 
     try {
-      const data = await s3.putObject(params); // Use putObject for uploading
+      const command = new PutObjectCommand(params);
+      const data = await s3Client.send(command);
       res.status(200).json({ message: 'Upload successful', data });
     } catch (error) {
       console.error('Upload Error', error);
