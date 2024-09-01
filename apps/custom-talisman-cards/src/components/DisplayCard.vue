@@ -1,6 +1,6 @@
 <template>
-    <div v-if="svgContent" v-html="svgContent"></div>
-    <div v-else>Loading SVG...</div>
+    <div>{{ card }}</div>
+    <img :src="`https://talismancards.s3.us-east-2.amazonaws.com/images/${card}`" /> 
   </template>
   
 <script setup lang="ts">
@@ -12,16 +12,4 @@
     });
 
     const svgContent = ref('');
-
-    onMounted(async () => {
-        try {
-            const response = await fetch(`/api/get-card?fileName=${encodeURIComponent(props.card)}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            svgContent.value = await response.text();
-        } catch (error) {
-            console.error('Error fetching SVG:', error);
-        }
-    })
 </script>

@@ -63,9 +63,7 @@
   import { ref, onMounted } from 'vue';
 
   const uploadSVG = async () => {
-    const svgBlob = new Blob([svgContent.value], { type: 'image/svg+xml' });
-    const svgDataUrl = URL.createObjectURL(svgBlob);
-    const fileName = `talisman_card_${Date.now()}.svg`; // Unique file name
+    const fileName = `talisman_card_${props.phone}_${props.name}.svg`; // Unique file name
 
     const response = await fetch('/api/upload', {
       method: 'POST',
@@ -73,7 +71,7 @@
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        imageData: svgDataUrl,
+        imageData: svgContent.value,
         fileName,
       }),
     });
@@ -312,5 +310,6 @@ form {
 }
 </style>
 
-// TODO::submit to server with name and phone // TODO::display approved congrats
-// TODO::edit picture // TODO::improve typing performance
+// TODO::display approved congrats in a nice way
+// TODO::edit picture functionality
+// TODO::improve typing performance

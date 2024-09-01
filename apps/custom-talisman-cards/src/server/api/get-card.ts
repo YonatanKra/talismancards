@@ -33,14 +33,14 @@ export default defineEventHandler(async (event) => {
     if (!data.Body) {
       throw new Error('No data received from S3');
     }
-
-    const svgContent = await data.Body.transformToString();
+    
+    const svgData = await data.Body.transformToString();
 
     // Set the correct content type for SVG
     setHeader(event, 'Content-Type', 'image/svg+xml');
     
-    // Return the SVG content
-    return svgContent;
+    // Return the SVG data URL
+    return svgData;
   } catch (error) {
     console.error('Error retrieving SVG:', error);
     throw createError({
