@@ -21,9 +21,9 @@ export default defineNuxtConfig({
   },
   css: [
     '~/assets/css/styles.css', 
-    /*'@vonage/vivid/styles/core/all.css', 
+    '@vonage/vivid/styles/core/all.css', 
     '@vonage/vivid/styles/tokens/theme-light.css', 
-    '@vonage/vivid/styles/fonts/spezia-variable.css'*/
+    '@vonage/vivid/styles/fonts/spezia-variable.css'
   ],
 
   vite: {

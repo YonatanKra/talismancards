@@ -5,8 +5,8 @@
   "scripts": {},
   "private": true,
   "dependencies": {
-    "@vonage/vivid-vue": "^4.4.0",
-    "aws-sdk": "^2.1687.0"
+    "@aws-sdk/client-s3": "^3.637.0",
+    "@vonage/vivid-vue": "^4.4.0"
   },
   "devDependencies": {
     "@nuxt/devtools": "^1.4.1",
