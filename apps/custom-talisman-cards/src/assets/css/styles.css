@@ -1,6 +1,6 @@
 /* Import Vivid Core Styles */
-@import '@Vonage/vivid/styles/core/all.css';
+@import '../../../node_modules/@vonage/vivid/styles/core/all.css';
 /* Import Tokens For Light Theme */
-@import '@Vonage/vivid/styles/tokens/theme-light.css';
+@import '../../../node_modules/@vonage/vivid/styles/tokens/theme-light.css';
 /* Load Spezia Variable fonts */
-@import '@Vonage/vivid/styles/fonts/spezia-variable.css';
+@import '../../../node_modules/@vonage/vivid/styles/fonts/spezia-variable.css';
