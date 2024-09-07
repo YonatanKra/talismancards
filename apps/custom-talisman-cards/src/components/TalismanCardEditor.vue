@@ -270,8 +270,6 @@
   // Load SVG on component mount
   onMounted(loadSVG);
 
-  const originalWidth = ref(90); // Original width of the SVG
-  const originalHeight = ref(40); // Original height of the SVG
   const isResizing = ref(false);
   const resizeDirection = ref('');
 
@@ -290,53 +288,56 @@
     const deltaY = event.movementY;
 
     const image = document.getElementById('img4');
-    originalWidth.value = Number(image.getAttribute('width').replace('%', ''));
-    originalHeight.value = Number(image.getAttribute('height').replace('%', ''));
+    const dimensions = {
+        width: Number(image.getAttribute('width').replace('%', '')),
+        height: Number(image.getAttribute('height').replace('%', '')),
+    };
 
     const positions = {
-      x: Number(image.getAttribute('x').replace('%', '')),
-      y: Number(image.getAttribute('y').replace('%', '')),
-    }
+        x: Number(image.getAttribute('x').replace('%', '')),
+        y: Number(image.getAttribute('y').replace('%', '')),
+    };
+
     switch (resizeDirection.value) {
-      case 'top-left':
-        originalWidth.value -= deltaX;
-        originalHeight.value -= deltaY;
-        positions.x += deltaX;
-        positions.y += deltaY;
-        break;
-      case 'top':
-        originalHeight.value -= deltaY;
-        break;
-      case 'top-right':
-        originalWidth.value += deltaX;
-        originalHeight.value -= deltaY;
-        break;
-      case 'left':
-        originalWidth.value -= deltaX;
-        break;
-      case 'right':
-        originalWidth.value += deltaX;
-        break;
-      case 'bottom-left':
-        originalWidth.value -= deltaX;
-        originalHeight.value += deltaY;
-        break;
-      case 'bottom':
-        originalHeight.value += deltaY;
-        break;
-      case 'bottom-right':
-        originalWidth.value += deltaX;
-        originalHeight.value += deltaY;
-        break;
+        case 'top-left':
+            dimensions.width -= deltaX;
+            dimensions.height -= deltaY;
+            positions.x += deltaX;
+            positions.y += deltaY;
+            break;
+        case 'top':
+            dimensions.height -= deltaY;
+            break;
+        case 'top-right':
+            dimensions.width += deltaX;
+            dimensions.height -= deltaY;
+            break;
+        case 'left':
+            dimensions.width -= deltaX;
+            break;
+        case 'right':
+            dimensions.width += deltaX;
+            break;
+        case 'bottom-left':
+            dimensions.width -= deltaX;
+            dimensions.height += deltaY;
+            break;
+        case 'bottom':
+            dimensions.height += deltaY;
+            break;
+        case 'bottom-right':
+            dimensions.width += deltaX;
+            dimensions.height += deltaY;
+            break;
     }
 
     // Update the img dimensions
-    image.setAttribute('width', `${originalWidth.value > 0 ? originalWidth.value : 10}%`);
-    image.setAttribute('height', `${originalHeight.value > 0 ? originalHeight.value : 10}%`);
+    image.setAttribute('width', `${dimensions.width > 0 ? dimensions.width : 10}%`);
+    image.setAttribute('height', `${dimensions.height > 0 ? dimensions.height : 10}%`);
     image.setAttribute('x', `${positions.x}%`);
     image.setAttribute('y', `${positions.y}%`);
     matchElementsDimenstions(image, imageEditor.value);
-  };
+};
 
   const stopResize = () => {
     isResizing.value = false;
