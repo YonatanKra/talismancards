@@ -54,19 +54,26 @@
 
     <div v-show="editingImage" 
          ref="imageEditor" 
-         id="clickableDiv" 
-         @click="resizeImage">
-        <div class="corner-square" style="grid-area: top-left; cursor: nwse-resize; margin: -10px;"></div>
-        <div class="rectangle" style="grid-area: top; cursor: ns-resize; margin: -10px 0;"></div>
-        <div class="corner-square" style="grid-area: top-right; cursor: nesw-resize; margin: -10px;"></div>
+         id="clickableDiv">
+        <div class="corner-square" 
+             style="grid-area: top-left; cursor: nwse-resize; margin: -10px;" 
+             @mousedown="startResize('top-left')"></div>
+        <div class="rectangle" style="grid-area: top; cursor: ns-resize; margin: -10px 0;" @mousedown="startResize('top')"></div>
+        <div class="corner-square" 
+             style="grid-area: top-right; cursor: nesw-resize; margin: -10px;" 
+             @mousedown="startResize('top-right')"></div>
         
-        <div class="rectangle" style="grid-area: left; cursor: ew-resize; margin: 0 -10px;"></div>
+        <div class="rectangle" style="grid-area: left; cursor: ew-resize; margin: 0 -10px;" @mousedown="startResize('left')"></div>
         <div style="grid-area: empty; background: transparent;"></div>
-        <div class="rectangle" style="grid-area: right; cursor: ew-resize; margin: 0 -10px;"></div>
+        <div class="rectangle" style="grid-area: right; cursor: ew-resize; margin: 0 -10px;" @mousedown="startResize('right')"></div>
         
-        <div class="corner-square" style="grid-area: bottom-left; cursor: nesw-resize; margin: -10px;"></div>
-        <div class="rectangle" style="grid-area: bottom; cursor: ns-resize; margin: -10px 0;"></div>
-        <div class="corner-square" style="grid-area: bottom-right; cursor: nwse-resize; margin: -10px;"></div>
+        <div class="corner-square" 
+             style="grid-area: bottom-left; cursor: nesw-resize; margin: -10px;" 
+             @mousedown="startResize('bottom-left')"></div>
+        <div class="rectangle" style="grid-area: bottom; cursor: ns-resize; margin: -10px 0;" @mousedown="startResize('bottom')"></div>
+        <div class="corner-square" 
+             style="grid-area: bottom-right; cursor: nwse-resize; margin: -10px;" 
+             @mousedown="startResize('bottom-right')"></div>
     </div>
 
     <!-- Load SVG -->
@@ -81,9 +88,14 @@
 <script setup lang="ts">
   import { ref, onMounted } from 'vue';
 
-  const resizeImage = async () => {
-    console.log('aaa');
-  };
+  function matchElementsDimenstions(element1, element2) {
+    const rect = element1.getBoundingClientRect();
+    element2.style.position = 'absolute';
+    element2.style.left = `${rect.left}px`;
+    element2.style.top = `${rect.top}px`;
+    element2.style.width = `${rect.width}px`;
+    element2.style.height = `${rect.height}px`;
+  }
 
   const editImage = async () => {
     editingImage.value = !editingImage.value;
@@ -91,12 +103,8 @@
       const image = document.getElementById('img4');
     
       const imageBorder = imageEditor.value;
-      const rect = image.getBoundingClientRect();
-      imageBorder.style.position = 'absolute';
-      imageBorder.style.left = `${rect.left}px`;
-      imageBorder.style.top = `${rect.top}px`;
-      imageBorder.style.width = `${rect.width}px`;
-      imageBorder.style.height = `${rect.height}px`;
+
+      matchElementsDimenstions(image, imageBorder);
     }
   }
 
@@ -261,6 +269,80 @@
 
   // Load SVG on component mount
   onMounted(loadSVG);
+
+  const originalWidth = ref(90); // Original width of the SVG
+  const originalHeight = ref(40); // Original height of the SVG
+  const isResizing = ref(false);
+  const resizeDirection = ref('');
+
+  const startResize = (direction) => {
+    isResizing.value = true;
+    resizeDirection.value = direction;
+
+    window.addEventListener('mousemove', resizeImage);
+    window.addEventListener('mouseup', stopResize);
+  };
+
+  const resizeImage = (event) => {
+    if (!isResizing.value) return;
+
+    const deltaX = event.movementX;
+    const deltaY = event.movementY;
+
+    const image = document.getElementById('img4');
+    originalWidth.value = Number(image.getAttribute('width').replace('%', ''));
+    originalHeight.value = Number(image.getAttribute('height').replace('%', ''));
+
+    const positions = {
+      x: Number(image.getAttribute('x').replace('%', '')),
+      y: Number(image.getAttribute('y').replace('%', '')),
+    }
+    switch (resizeDirection.value) {
+      case 'top-left':
+        originalWidth.value -= deltaX;
+        originalHeight.value -= deltaY;
+        positions.x += deltaX;
+        positions.y += deltaY;
+        break;
+      case 'top':
+        originalHeight.value -= deltaY;
+        break;
+      case 'top-right':
+        originalWidth.value += deltaX;
+        originalHeight.value -= deltaY;
+        break;
+      case 'left':
+        originalWidth.value -= deltaX;
+        break;
+      case 'right':
+        originalWidth.value += deltaX;
+        break;
+      case 'bottom-left':
+        originalWidth.value -= deltaX;
+        originalHeight.value += deltaY;
+        break;
+      case 'bottom':
+        originalHeight.value += deltaY;
+        break;
+      case 'bottom-right':
+        originalWidth.value += deltaX;
+        originalHeight.value += deltaY;
+        break;
+    }
+
+    // Update the img dimensions
+    image.setAttribute('width', `${originalWidth.value > 0 ? originalWidth.value : 10}%`);
+    image.setAttribute('height', `${originalHeight.value > 0 ? originalHeight.value : 10}%`);
+    image.setAttribute('x', `${positions.x}%`);
+    image.setAttribute('y', `${positions.y}%`);
+    matchElementsDimenstions(image, imageEditor.value);
+  };
+
+  const stopResize = () => {
+    isResizing.value = false;
+    window.removeEventListener('mousemove', resizeImage);
+    window.removeEventListener('mouseup', stopResize);
+  };
 </script>
 
 <style scoped>
