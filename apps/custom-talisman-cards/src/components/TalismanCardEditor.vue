@@ -64,7 +64,8 @@
              @mousedown="startResize('top-right')"></div>
         
         <div class="rectangle" style="grid-area: left; cursor: ew-resize; margin: 0 -10px;" @mousedown="startResize('left')"></div>
-        <div style="grid-area: empty; background: transparent;"></div>
+        <div style="grid-area: empty; background: transparent;" 
+             @mousedown="startDrag"></div>
         <div class="rectangle" style="grid-area: right; cursor: ew-resize; margin: 0 -10px;" @mousedown="startResize('right')"></div>
         
         <div class="corner-square" 
@@ -80,7 +81,7 @@
 
     <div class="card-preview">
       <vwc-button connotation="success" label="Edit Image" @click="editImage"></vwc-button>
-      <div v-html="svgContent" class="svg-container"></div>
+      <div ref="svgContainer" v-html="svgContent" class="svg-container"></div>
     </div>
   </div>
 </template>
@@ -146,6 +147,7 @@
   const editingImage = ref(false);
   const editorForm = ref<HTMLFormElement | null>(null);
   const imageEditor = ref<HTMLFormElement | null>(null);
+  const svgContainer = ref<HTMLFormElement | null>(null);
   const uploadedImage = ref<string | null>(null); // Store uploaded image data
 
   // Load the SVG file
@@ -343,6 +345,48 @@
     isResizing.value = false;
     window.removeEventListener('mousemove', resizeImage);
     window.removeEventListener('mouseup', stopResize);
+  };
+
+  const isDragging = ref(false);
+  const initialMousePosition = ref({ x: 0, y: 0 });
+  const initialImagePosition = ref({ x: 0, y: 0 });
+
+  const startDrag = (event) => {
+    isDragging.value = true;
+    initialMousePosition.value = { x: event.clientX, y: event.clientY };
+
+    const image = document.getElementById('img4');
+    initialImagePosition.value = {
+        x: Number(image.getAttribute('x').replace('%', '')),
+        y: Number(image.getAttribute('y').replace('%', '')),
+    };
+
+    window.addEventListener('mousemove', dragImage);
+    window.addEventListener('mouseup', stopDrag);
+  };
+
+  const dragImage = (event) => {
+    if (!isDragging.value) return;
+
+    
+
+    const deltaX = event.clientX - initialMousePosition.value.x;
+    const deltaY = event.clientY - initialMousePosition.value.y;
+
+    const image = document.getElementById('img4');
+    const newX = initialImagePosition.value.x + deltaX / 7;
+    const newY = initialImagePosition.value.y + deltaY / 7;
+
+    console.log(initialImagePosition.value.x, ', ', initialImagePosition.value.y);
+    
+    image.setAttribute('x', `${newX}%`);
+    image.setAttribute('y', `${newY}%`);
+  };
+
+  const stopDrag = () => {
+    isDragging.value = false;
+    window.removeEventListener('mousemove', dragImage);
+    window.removeEventListener('mouseup', stopDrag);
   };
 </script>
 
