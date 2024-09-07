@@ -80,7 +80,9 @@
     <!-- Load SVG -->
 
     <div class="card-preview">
-      <vwc-button connotation="success" label="Edit Image" @click="editImage"></vwc-button>
+      <vwc-button v-if="editingImage" connotation="alert" label="יציאה מעריכת תמונה" @click="editImage"></vwc-button>
+      <vwc-button v-if="editingImage" connotation="alert" label="אתחול גודל תמונה" @click="resetImage"></vwc-button>
+      <vwc-button v-else="editingImage" connotation="success" label="עריכת תמונה" @click="editImage"></vwc-button>
       <div ref="svgContainer" v-html="svgContent" class="svg-container"></div>
     </div>
   </div>
@@ -96,6 +98,17 @@
     element2.style.top = `${rect.top}px`;
     element2.style.width = `${rect.width}px`;
     element2.style.height = `${rect.height}px`;
+  }
+
+  const resetImage = async () => {
+    const image = document.getElementById('img4');
+
+    image.setAttribute('x', '5%');
+    image.setAttribute('y', '15%');
+    image.setAttribute('width', '90%');
+    image.setAttribute('height', '45%');
+
+    matchElementsDimenstions(image, imageEditor.value);
   }
 
   const editImage = async () => {
@@ -142,6 +155,7 @@
     },
   });
 
+  let originalImage;
   const svgContent = ref('');
   const originalSVG = ref('');
   const editingImage = ref(false);
@@ -204,6 +218,8 @@
   }
 
   const handleFileUpload = (event: Event) => {
+    resetImage();
+    editingImage.value = false;
     const fileInput = event.target as HTMLInputElement;
     if (fileInput.files && fileInput.files[0]) {
       const file = fileInput.files[0];
@@ -309,13 +325,16 @@
             break;
         case 'top':
             dimensions.height -= deltaY;
+            positions.y += deltaY;
             break;
         case 'top-right':
             dimensions.width += deltaX;
             dimensions.height -= deltaY;
+            positions.y += deltaY;
             break;
         case 'left':
             dimensions.width -= deltaX;
+            positions.x += deltaX;
             break;
         case 'right':
             dimensions.width += deltaX;
@@ -323,9 +342,11 @@
         case 'bottom-left':
             dimensions.width -= deltaX;
             dimensions.height += deltaY;
+            positions.x += deltaX;
             break;
         case 'bottom':
             dimensions.height += deltaY;
+            // positions.y -= deltaY;
             break;
         case 'bottom-right':
             dimensions.width += deltaX;
@@ -376,11 +397,11 @@
     const image = document.getElementById('img4');
     const newX = initialImagePosition.value.x + deltaX / 7;
     const newY = initialImagePosition.value.y + deltaY / 7;
-
-    console.log(initialImagePosition.value.x, ', ', initialImagePosition.value.y);
     
     image.setAttribute('x', `${newX}%`);
     image.setAttribute('y', `${newY}%`);
+
+    matchElementsDimenstions(image, imageEditor.value);
   };
 
   const stopDrag = () => {
