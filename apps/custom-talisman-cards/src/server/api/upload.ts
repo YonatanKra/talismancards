@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
       region: process.env.AWS_REGION,
     });
 
-    const buffer = Buffer.from(imageData.replace(/^data:image\/svg\+xml;base64,/, ''), 'base64');
+    const buffer = Buffer.from(imageData);
 
     const params = {
       Bucket: process.env.AWS_BUCKET_NAME,
