@@ -46,7 +46,7 @@
         <vwc-button
           appearance="filled"
           connotation="cta"
-          label="Upload SVG"
+          label="שליחת ברכה"
           @click="uploadSVG"
         ></vwc-button>
       </form>
@@ -82,6 +82,7 @@
     <div class="card-preview">
       <vwc-button v-if="editingImage" connotation="alert" label="יציאה מעריכת תמונה" @click="editImage"></vwc-button>
       <vwc-button v-if="editingImage" connotation="alert" label="אתחול גודל תמונה" @click="resetImage"></vwc-button>
+      <vwc-button v-if="editingImage" connotation="alert" label="סיום עריכת תמונה" @click="endImageEdit"></vwc-button>
       <vwc-button v-else="editingImage" connotation="success" label="עריכת תמונה" @click="editImage"></vwc-button>
       <div ref="svgContainer" v-html="svgContent" class="svg-container"></div>
     </div>
@@ -99,6 +100,12 @@
     element2.style.width = `${rect.width}px`;
     element2.style.height = `${rect.height}px`;
   }
+
+  const endImageEdit = async () => {
+    editingImage.value = false;
+    const svg = svgContainer.value.querySelector('svg');
+    svgContent.value = svg.outerHTML;
+  };
 
   const resetImage = async () => {
     const image = document.getElementById('img4');
@@ -123,6 +130,7 @@
   }
 
   const uploadSVG = async () => {
+    endImageEdit();
     const fileName = `talisman_card_${props.phone}_${props.name}.svg`; // Unique file name
 
     const response = await fetch('/api/upload', {
@@ -389,8 +397,6 @@
   const dragImage = (event) => {
     if (!isDragging.value) return;
 
-    
-
     const deltaX = event.clientX - initialMousePosition.value.x;
     const deltaY = event.clientY - initialMousePosition.value.y;
 
@@ -456,6 +462,11 @@ form {
   width: 100%; /* Full width */
   max-width: 500px; /* Limit width for card */
   height: auto; /* Allow height to adjust */
+}
+
+.card-preview vwc-button {
+  z-index: 9999;
+  position: relative;
 }
 
 .svg-container {
