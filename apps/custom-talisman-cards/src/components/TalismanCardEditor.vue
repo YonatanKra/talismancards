@@ -52,8 +52,27 @@
       </form>
     </div>
 
+    <div v-show="editingImage" 
+         ref="imageEditor" 
+         id="clickableDiv" 
+         @click="resizeImage">
+        <div class="corner-square" style="grid-area: top-left; cursor: nwse-resize; margin: -10px;"></div>
+        <div class="rectangle" style="grid-area: top; cursor: ns-resize; margin: -10px 0;"></div>
+        <div class="corner-square" style="grid-area: top-right; cursor: nesw-resize; margin: -10px;"></div>
+        
+        <div class="rectangle" style="grid-area: left; cursor: ew-resize; margin: 0 -10px;"></div>
+        <div style="grid-area: empty; background: transparent;"></div>
+        <div class="rectangle" style="grid-area: right; cursor: ew-resize; margin: 0 -10px;"></div>
+        
+        <div class="corner-square" style="grid-area: bottom-left; cursor: nesw-resize; margin: -10px;"></div>
+        <div class="rectangle" style="grid-area: bottom; cursor: ns-resize; margin: -10px 0;"></div>
+        <div class="corner-square" style="grid-area: bottom-right; cursor: nwse-resize; margin: -10px;"></div>
+    </div>
+
     <!-- Load SVG -->
+
     <div class="card-preview">
+      <vwc-button connotation="success" label="Edit Image" @click="editImage"></vwc-button>
       <div v-html="svgContent" class="svg-container"></div>
     </div>
   </div>
@@ -61,6 +80,25 @@
 
 <script setup lang="ts">
   import { ref, onMounted } from 'vue';
+
+  const resizeImage = async () => {
+    console.log('aaa');
+  };
+
+  const editImage = async () => {
+    editingImage.value = !editingImage.value;
+    if (editingImage.value) {
+      const image = document.getElementById('img4');
+    
+      const imageBorder = imageEditor.value;
+      const rect = image.getBoundingClientRect();
+      imageBorder.style.position = 'absolute';
+      imageBorder.style.left = `${rect.left}px`;
+      imageBorder.style.top = `${rect.top}px`;
+      imageBorder.style.width = `${rect.width}px`;
+      imageBorder.style.height = `${rect.height}px`;
+    }
+  }
 
   const uploadSVG = async () => {
     const fileName = `talisman_card_${props.phone}_${props.name}.svg`; // Unique file name
@@ -97,7 +135,9 @@
 
   const svgContent = ref('');
   const originalSVG = ref('');
+  const editingImage = ref(false);
   const editorForm = ref<HTMLFormElement | null>(null);
+  const imageEditor = ref<HTMLFormElement | null>(null);
   const uploadedImage = ref<string | null>(null); // Store uploaded image data
 
   // Load the SVG file
@@ -224,6 +264,18 @@
 </script>
 
 <style scoped>
+#clickableDiv {
+  --drag-area-block-size: 10px;
+  grid-template-columns: var(--drag-area-block-size) 1fr var(--drag-area-block-size);
+  grid-template-rows: var(--drag-area-block-size) 1fr var(--drag-area-block-size);
+  display: grid; 
+  grid-template-areas: 
+    'top-left top top-right'
+    'left empty right'
+    'bottom-left bottom bottom-right';
+  border: 4px dashed #999; 
+}
+
 h1 {
   font-size: 18px;
   direction: rtl;
@@ -312,4 +364,7 @@ form {
 
 // TODO::display approved congrats in a nice way
 // TODO::edit picture functionality
+// 1) Add border to image + cursor resize on click on button "resize image"
+// 2) Allow to resize when clicked on border
+// 3) Remove border before uploading the image
 // TODO::improve typing performance
