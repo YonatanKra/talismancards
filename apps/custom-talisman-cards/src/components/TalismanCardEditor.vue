@@ -8,32 +8,32 @@
         <vwc-text-field
           name="cardTitle"
           placeholder="כותרת"
-          value="כותרת"
-          @input="updateSVG"
+          v-bind:current-value="cardTitle"
+          @input="event => cardTitle = event.target.value"
         ></vwc-text-field>
 
         <!-- Subtitle -->
         <vwc-text-field
           name="cardSubtitle"
           placeholder="תת כותרת"
-          value="תת כותרת"
-          @input="updateSVG"
+          v-bind:current-value="cardSubtitle"
+          @input="event => cardSubtitle = event.target.value"
         ></vwc-text-field>
 
         <!-- Card Type -->
         <vwc-text-field
           name="cardType"
           placeholder="כותרת טקסט"
-          value="כותרת טקסט"
-          @input="updateSVG"
+          v-bind:current-value="cardType"
+          @input="event => cardType = event.target.value"
         ></vwc-text-field>
 
         <!-- Description -->
         <vwc-text-area
           name="cardDescription"
           placeholder="טקסט"
-          value="טקסט"
-          @input="updateSVG"
+          v-bind:current-value="cardDescription"
+          @input="event => cardDescription = event.target.value"
         ></vwc-text-area>
 
         <input
@@ -163,15 +163,26 @@
     },
   });
 
-  let originalImage;
+  
+  const cardTitle = ref('כותרת');
+  const cardSubtitle = ref('תת כותרת');
+  const cardDescription = ref('טקסט');
+  const cardType = ref('כותרת טקסט');
   const svgContent = ref('');
   const originalSVG = ref('');
   const editingImage = ref(false);
   const editorForm = ref<HTMLFormElement | null>(null);
   const imageEditor = ref<HTMLFormElement | null>(null);
   const svgContainer = ref<HTMLFormElement | null>(null);
-  const uploadedImage = ref<string | null>(null); // Store uploaded image data
+  const uploadedImage = ref<string | null>(null);
+  const isDragging = ref(false);
+  const initialMousePosition = ref({ x: 0, y: 0 });
+  const initialImagePosition = ref({ x: 0, y: 0 });
 
+  watch(cardTitle, () => updateSVG('cardTitle'));
+  watch(cardSubtitle, () => updateSVG('cardSubtitle'));
+  watch(cardType, () => updateSVG('cardType'));
+  watch(cardDescription, () => updateSVG('cardDescription'));
   // Load the SVG file
   const loadSVG = async () => {
     const response = await fetch('/talisman_card.svg');
@@ -240,7 +251,7 @@
     }
   };
 
-  const updateSVG = () => {
+  const updateSVG = (updateOnly = null) => {
     function getFormData() {
       const formData = new FormData(editorForm.value);
       const cardTitle = formData.get('cardTitle');
@@ -257,19 +268,37 @@
 
     const { cardTitle, cardSubtitle, cardType, cardDescription } = getFormData();
 
-    // Create a new SVG string with updated values
-    let updatedSVG = originalSVG.value // Use the original SVG template
-      .replace(/{{cardTitle}}/g, cardTitle)
-      .replace(/{{cardSubtitle}}/g, cardSubtitle)
-      .replace(/{{cardType}}/g, cardType);
+    let updatedSVG = originalSVG.value;
+    const svg = svgContainer.value.querySelector('svg');
+    switch(updateOnly) {
+      case 'cardTitle':
+        svg.getElementById('Card Name').children[0].innerHTML = cardTitle as string;
+        return;
+      case 'cardSubtitle':
+        svg.getElementById('Event').children[0].innerHTML = cardSubtitle as string;
+        return;
+      case 'cardType':
+        svg.getElementById('Description').children[0].innerHTML = cardType as string;
+        return;
+      case 'cardDescription':
+        svg.getElementById('DescriptionText').innerHTML = parseDescription(cardDescription) as string;
+        return;
+      default:
+        // Create a new SVG string with updated values
+        updatedSVG = updatedSVG // Use the original SVG template
+          .replace(/{{cardTitle}}/g, cardTitle)
+          .replace(/{{cardSubtitle}}/g, cardSubtitle)
+          .replace(/{{cardType}}/g, cardType);
 
-    updatedSVG = updatedSVG.replace(
-      /{{cardDescription}}/g,
-      parseDescription(cardDescription)
-    );
+        updatedSVG = updatedSVG.replace(
+          /{{cardDescription}}/g,
+          parseDescription(cardDescription)
+        );
 
-    if (uploadedImage.value) {
-      updatedSVG = replaceImageInSVG(updatedSVG, uploadedImage.value, 'img4');
+        if (uploadedImage.value) {
+          updatedSVG = replaceImageInSVG(updatedSVG, uploadedImage.value, 'img4');
+        }
+        break;
     }
 
     svgContent.value = updatedSVG; // Update the displayed SVG
@@ -368,17 +397,13 @@
     image.setAttribute('x', `${positions.x}%`);
     image.setAttribute('y', `${positions.y}%`);
     matchElementsDimenstions(image, imageEditor.value);
-};
+  };
 
   const stopResize = () => {
     isResizing.value = false;
     window.removeEventListener('mousemove', resizeImage);
     window.removeEventListener('mouseup', stopResize);
   };
-
-  const isDragging = ref(false);
-  const initialMousePosition = ref({ x: 0, y: 0 });
-  const initialImagePosition = ref({ x: 0, y: 0 });
 
   const startDrag = (event) => {
     isDragging.value = true;

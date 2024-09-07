@@ -41,10 +41,11 @@
 		</text>
 	</g>
 	<g id="Flavour Texts">
-		<text direction="rtl" id="Flavour Text - Armour" x="50%" y="67.5%" text-anchor="middle">
-			<tspan direction="rtl" x="50%" class="t1">{{cardType}}</tspan>
-			{{cardDescription}}
+		<text direction="rtl" id="Description" x="50%" y="67.5%" text-anchor="middle">
+			<tspan direction="rtl" x="50%" class="t4">{{cardType}}</tspan>
 		</text>
+		<text direction="rtl" id="DescriptionText" x="50%" y="67.5%" class="t1"
+			  text-anchor="middle">{{cardDescription}}</text>
 	</g>
 	<text direction="rtl" id="Card Name" style="transform: matrix(1,0,0,1,12,44)" >
 		<tspan x="50%" y="28.5" class="t6" text-anchor="middle">{{cardTitle}}</tspan>
