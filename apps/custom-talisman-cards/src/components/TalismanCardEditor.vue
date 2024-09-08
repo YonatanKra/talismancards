@@ -54,7 +54,7 @@
 
     <div v-show="editingImage" 
          ref="imageEditor" 
-         id="clickableDiv">
+         id="image-editor-border">
         <div class="corner-square" 
              style="grid-area: top-left; cursor: nwse-resize; margin: -10px;" 
              @mousedown="startResize('top-left')"></div>
@@ -80,9 +80,45 @@
     <!-- Load SVG -->
 
     <div class="card-preview">
-      <vwc-button v-if="editingImage" connotation="alert" label="יציאה מעריכת תמונה" @click="editImage"></vwc-button>
-      <vwc-button v-if="editingImage" connotation="alert" label="אתחול גודל תמונה" @click="resetImage"></vwc-button>
-      <vwc-button v-if="editingImage" connotation="alert" label="סיום עריכת תמונה" @click="endImageEdit"></vwc-button>
+      <vwc-alert
+        v-bind:open="editingImage"
+        class="image-edit-alert"
+        placement="bottom"
+      >
+      <div slot="main" v-if="editingImage" class="image-editor-form">
+        <vwc-text-field type="number"
+          label="Width"
+          v-bind:current-value="imageWidth"
+          @input="event => imageWidth = event.target.value"
+        ></vwc-text-field>
+        <vwc-text-field type="number"
+          label="Height"
+          v-bind:current-value="imageHeight"
+          @input="event => imageHeight = event.target.value"
+        ></vwc-text-field>
+        <vwc-text-field type="number"
+          label="X"
+          v-bind:current-value="imageX"
+          @input="event => imageX = event.target.value"
+        ></vwc-text-field>
+        <vwc-text-field type="number"
+          label="Y"
+          v-bind:current-value="imageY"
+          @input="event => imageY = event.target.value"
+        ></vwc-text-field>
+        <div class="full-width">
+          <vwc-button connotation="alert" label="יציאה מעריכת תמונה" @click="editImage"></vwc-button>
+          <vwc-button connotation="alert" label="אתחול גודל תמונה" @click="resetImage"></vwc-button>
+          <vwc-button connotation="alert" label="סיום עריכת תמונה" @click="endImageEdit"></vwc-button>
+        </div>
+      </div>
+    </vwc-alert>
+      
+      <div v-if="editingImage" class="full-width">
+        <vwc-button connotation="alert" label="יציאה מעריכת תמונה" @click="editImage"></vwc-button>
+        <vwc-button connotation="alert" label="אתחול גודל תמונה" @click="resetImage"></vwc-button>
+        <vwc-button connotation="alert" label="סיום עריכת תמונה" @click="endImageEdit"></vwc-button>
+      </div>
       <vwc-button v-else="editingImage" connotation="success" label="עריכת תמונה" @click="editImage"></vwc-button>
       <div ref="svgContainer" v-html="svgContent" class="svg-container"></div>
     </div>
@@ -93,7 +129,18 @@
   import { ref, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
 
-  const router = useRouter();
+  function setVariables(svgText) {
+    const tmpElement = document.createElement('div');
+    tmpElement.innerHTML = svgText;
+    const titleElement = tmpElement.querySelector('#Card\\ Name');
+    cardTitle.value = titleElement ? titleElement.children[0].innerHTML : '';
+    const subTitleElement = tmpElement.querySelector('#Event');
+    cardSubtitle.value = subTitleElement ? subTitleElement.children[0].innerHTML : '';
+    const typeElement = tmpElement.querySelector('#Description');
+    cardType.value = typeElement ? typeElement.children[0].innerHTML : '';
+    const descriptionElement = tmpElement.querySelector('#DescriptionText');
+    cardDescription.value = getTextFromSVGTextElement(descriptionElement);
+  }
 
   function matchElementsDimenstions(element1, element2) {
     const rect = element1.getBoundingClientRect();
@@ -118,7 +165,65 @@
     const result = textArray.join('\n');
 
     return result;
-}
+  }
+
+  function resizeImage({deltaX, deltaY}) {
+    const image = document.getElementById('img4');
+    const dimensions = {
+        width: Number(image.getAttribute('width').replace('%', '')),
+        height: Number(image.getAttribute('height').replace('%', '')),
+    };
+
+    const positions = {
+        x: Number(image.getAttribute('x').replace('%', '')),
+        y: Number(image.getAttribute('y').replace('%', '')),
+    };
+
+    switch (resizeDirection.value) {
+        case 'top-left':
+            dimensions.width -= deltaX;
+            dimensions.height -= deltaY;
+            positions.x += deltaX;
+            positions.y += deltaY;
+            break;
+        case 'top':
+            dimensions.height -= deltaY;
+            positions.y += deltaY;
+            break;
+        case 'top-right':
+            dimensions.width += deltaX;
+            dimensions.height -= deltaY;
+            positions.y += deltaY;
+            break;
+        case 'left':
+            dimensions.width -= deltaX;
+            positions.x += deltaX;
+            break;
+        case 'right':
+            dimensions.width += deltaX;
+            break;
+        case 'bottom-left':
+            dimensions.width -= deltaX;
+            dimensions.height += deltaY;
+            positions.x += deltaX;
+            break;
+        case 'bottom':
+            dimensions.height += deltaY;
+            // positions.y -= deltaY;
+            break;
+        case 'bottom-right':
+            dimensions.width += deltaX;
+            dimensions.height += deltaY;
+            break;
+    }
+
+    // Update the img dimensions
+    image.setAttribute('width', `${dimensions.width > 0 ? dimensions.width : 10}%`);
+    image.setAttribute('height', `${dimensions.height > 0 ? dimensions.height : 10}%`);
+    image.setAttribute('x', `${positions.x}%`);
+    image.setAttribute('y', `${positions.y}%`);
+    matchElementsDimenstions(image, imageEditor.value);
+  }
 
   const endImageEdit = async () => {
     editingImage.value = false;
@@ -143,6 +248,10 @@
       const image = document.getElementById('img4');
     
       const imageBorder = imageEditor.value;
+      imageWidth.value = Number(image.getAttribute('width').replace('%', ''));
+      imageHeight.value = Number(image.getAttribute('height').replace('%', ''));
+      imageX.value = Number(image.getAttribute('x').replace('%', ''));
+      imageY.value = Number(image.getAttribute('y').replace('%', ''));
 
       matchElementsDimenstions(image, imageBorder);
     }
@@ -183,6 +292,7 @@
     },
   });
 
+  const router = useRouter();
   
   const cardTitle = ref('כותרת');
   const cardSubtitle = ref('תת כותרת');
@@ -198,25 +308,25 @@
   const isDragging = ref(false);
   const initialMousePosition = ref({ x: 0, y: 0 });
   const initialImagePosition = ref({ x: 0, y: 0 });
+  const imageWidth = ref(0);
+  const imageHeight = ref(0);
+  const imageX = ref(0);
+  const imageY = ref(0);
 
   watch(cardTitle, () => updateSVG('cardTitle'));
   watch(cardSubtitle, () => updateSVG('cardSubtitle'));
   watch(cardType, () => updateSVG('cardType'));
   watch(cardDescription, () => updateSVG('cardDescription'));
+  watch([imageHeight, imageWidth, imageX, imageY], () => updateImageDimensions());
   
-  function setVariables(svgText) {
-    const tmpElement = document.createElement('div');
-    tmpElement.innerHTML = svgText;
-    const titleElement = tmpElement.querySelector('#Card\\ Name');
-    cardTitle.value = titleElement ? titleElement.children[0].innerHTML : '';
-    const subTitleElement = tmpElement.querySelector('#Event');
-    cardSubtitle.value = subTitleElement ? subTitleElement.children[0].innerHTML : '';
-    const typeElement = tmpElement.querySelector('#Description');
-    cardType.value = typeElement ? typeElement.children[0].innerHTML : '';
-    const descriptionElement = tmpElement.querySelector('#DescriptionText');
-    cardDescription.value = getTextFromSVGTextElement(descriptionElement);
-  }
-
+  const updateImageDimensions = () => {
+    const image = document.getElementById('img4');
+    image.setAttribute('width', `${imageWidth.value}%`);
+    image.setAttribute('height', `${imageHeight.value}%`);
+    image.setAttribute('x', `${imageX.value}%`);
+    image.setAttribute('y', `${imageY.value}%`);
+    matchElementsDimenstions(image, imageEditor.value);
+  };
   // Load the SVG file
   const loadSVG = async () => {
     let text = '';
@@ -371,80 +481,28 @@
   const isResizing = ref(false);
   const resizeDirection = ref('');
 
+
   const startResize = (direction) => {
     isResizing.value = true;
     resizeDirection.value = direction;
 
-    window.addEventListener('mousemove', resizeImage);
+    window.addEventListener('mousemove', onResizeImage);
     window.addEventListener('mouseup', stopResize);
   };
 
-  const resizeImage = (event) => {
+  
+  const onResizeImage = (event) => {
     if (!isResizing.value) return;
 
     const deltaX = event.movementX;
     const deltaY = event.movementY;
 
-    const image = document.getElementById('img4');
-    const dimensions = {
-        width: Number(image.getAttribute('width').replace('%', '')),
-        height: Number(image.getAttribute('height').replace('%', '')),
-    };
-
-    const positions = {
-        x: Number(image.getAttribute('x').replace('%', '')),
-        y: Number(image.getAttribute('y').replace('%', '')),
-    };
-
-    switch (resizeDirection.value) {
-        case 'top-left':
-            dimensions.width -= deltaX;
-            dimensions.height -= deltaY;
-            positions.x += deltaX;
-            positions.y += deltaY;
-            break;
-        case 'top':
-            dimensions.height -= deltaY;
-            positions.y += deltaY;
-            break;
-        case 'top-right':
-            dimensions.width += deltaX;
-            dimensions.height -= deltaY;
-            positions.y += deltaY;
-            break;
-        case 'left':
-            dimensions.width -= deltaX;
-            positions.x += deltaX;
-            break;
-        case 'right':
-            dimensions.width += deltaX;
-            break;
-        case 'bottom-left':
-            dimensions.width -= deltaX;
-            dimensions.height += deltaY;
-            positions.x += deltaX;
-            break;
-        case 'bottom':
-            dimensions.height += deltaY;
-            // positions.y -= deltaY;
-            break;
-        case 'bottom-right':
-            dimensions.width += deltaX;
-            dimensions.height += deltaY;
-            break;
-    }
-
-    // Update the img dimensions
-    image.setAttribute('width', `${dimensions.width > 0 ? dimensions.width : 10}%`);
-    image.setAttribute('height', `${dimensions.height > 0 ? dimensions.height : 10}%`);
-    image.setAttribute('x', `${positions.x}%`);
-    image.setAttribute('y', `${positions.y}%`);
-    matchElementsDimenstions(image, imageEditor.value);
+    resizeImage({deltaX, deltaY});
   };
 
   const stopResize = () => {
     isResizing.value = false;
-    window.removeEventListener('mousemove', resizeImage);
+    window.removeEventListener('mousemove', onResizeImage);
     window.removeEventListener('mouseup', stopResize);
   };
 
@@ -458,16 +516,11 @@
         y: Number(image.getAttribute('y').replace('%', '')),
     };
 
-    window.addEventListener('mousemove', dragImage);
+    window.addEventListener('mousemove', onDragImage);
     window.addEventListener('mouseup', stopDrag);
   };
 
-  const dragImage = (event) => {
-    if (!isDragging.value) return;
-
-    const deltaX = event.clientX - initialMousePosition.value.x;
-    const deltaY = event.clientY - initialMousePosition.value.y;
-
+  function dragImage({deltaX, deltaY}) {
     const image = document.getElementById('img4');
     const newX = initialImagePosition.value.x + deltaX / 7;
     const newY = initialImagePosition.value.y + deltaY / 7;
@@ -476,17 +529,37 @@
     image.setAttribute('y', `${newY}%`);
 
     matchElementsDimenstions(image, imageEditor.value);
+  }
+
+  const onDragImage = (event) => {
+    if (!isDragging.value) return;
+
+    const deltaX = event.clientX - initialMousePosition.value.x;
+    const deltaY = event.clientY - initialMousePosition.value.y;
+
+    dragImage({deltaX, deltaY});
   };
 
   const stopDrag = () => {
     isDragging.value = false;
-    window.removeEventListener('mousemove', dragImage);
+    window.removeEventListener('mousemove', onDragImage);
     window.removeEventListener('mouseup', stopDrag);
   };
 </script>
 
 <style scoped>
-#clickableDiv {
+.image-editor-form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Two columns */
+  grid-template-rows: repeat(2, auto) auto; /* Two rows of auto height, plus one additional row */
+  gap: 10px; /* Optional: space between grid items */  
+}
+
+.full-width {
+  grid-column: 1 / -1; /* Span across all columns */
+}
+
+#image-editor-border {
   --drag-area-block-size: 10px;
   grid-template-columns: var(--drag-area-block-size) 1fr var(--drag-area-block-size);
   grid-template-rows: var(--drag-area-block-size) 1fr var(--drag-area-block-size);
@@ -496,6 +569,20 @@
     'left empty right'
     'bottom-left bottom bottom-right';
   border: 4px dashed #999; 
+}
+
+.image-edit-alert {
+  display: none !important; 
+}
+
+@media (max-width: 768px) {
+  #image-editor-border {
+    display: none;
+  }
+
+  .image-edit-alert {
+    display: block;
+  }
 }
 
 h1 {
@@ -591,5 +678,5 @@ form {
 
 // TODO::display approved congrats in a nice way
 /* TODO::edit picture functionality
-// 4) Resize and move on mobile
+// 4) Load Resize and move on mobile as banner or something
 */
