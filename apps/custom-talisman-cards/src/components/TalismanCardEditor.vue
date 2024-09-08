@@ -470,7 +470,7 @@
   const getTextWidth = (text) => {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
-    context.font = '16px Caxton BT'; // Use the same font as in the SVG
+    context.font = '25px Caxton BT'; // Use the same font as in the SVG
     return context.measureText(text).width;
   };
 
