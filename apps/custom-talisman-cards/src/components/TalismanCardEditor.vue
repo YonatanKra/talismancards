@@ -677,6 +677,3 @@ form {
 </style>
 
 // TODO::display approved congrats in a nice way
-/* TODO::edit picture functionality
-// 4) Load Resize and move on mobile as banner or something
-*/
