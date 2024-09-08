@@ -107,7 +107,6 @@
           @input="event => imageY = event.target.value"
         ></vwc-text-field>
         <div class="full-width">
-          <vwc-button connotation="alert" label="יציאה מעריכת תמונה" @click="editImage"></vwc-button>
           <vwc-button connotation="alert" label="אתחול גודל תמונה" @click="resetImage"></vwc-button>
           <vwc-button connotation="alert" label="סיום עריכת תמונה" @click="endImageEdit"></vwc-button>
         </div>
@@ -571,20 +570,6 @@
   border: 4px dashed #999; 
 }
 
-.image-edit-alert {
-  display: none !important; 
-}
-
-@media (max-width: 768px) {
-  #image-editor-border {
-    display: none;
-  }
-
-  .image-edit-alert {
-    display: block;
-  }
-}
-
 h1 {
   font-size: 18px;
   direction: rtl;
@@ -656,6 +641,11 @@ form {
   }
 }
 
+@media (max-width: 768px) {
+  #image-editor-border {
+    display: none;
+  }
+}
 @media (min-width: 768px) {
   .editor-container {
     flex-direction: row; /* Side by side on larger screens */
@@ -672,6 +662,10 @@ form {
 
   text {
     direction: rtl !important;
+  }
+
+  .image-edit-alert {
+    display: none !important; 
   }
 }
 </style>
