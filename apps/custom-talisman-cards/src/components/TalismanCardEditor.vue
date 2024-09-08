@@ -91,6 +91,9 @@
 
 <script setup lang="ts">
   import { ref, onMounted } from 'vue';
+  import { useRouter } from 'vue-router';
+
+  const router = useRouter();
 
   function matchElementsDimenstions(element1, element2) {
     const rect = element1.getBoundingClientRect();
@@ -100,6 +103,22 @@
     element2.style.width = `${rect.width}px`;
     element2.style.height = `${rect.height}px`;
   }
+
+  function getTextFromSVGTextElement(textElement) {
+    // Check if the provided element is a valid SVG <text> element
+    if (!textElement || textElement.tagName !== 'text') {
+        throw new Error('Invalid SVG text element');
+    }
+
+    // Get all <tspan> elements within the <text> element
+    const tspanElements = textElement.getElementsByTagName('tspan');
+    
+    // Extract the text content from each <tspan> and join with newline characters
+    const textArray = Array.from(tspanElements).map(tspan => tspan.textContent.trim());
+    const result = textArray.join('\n');
+
+    return result;
+}
 
   const endImageEdit = async () => {
     editingImage.value = false;
@@ -147,6 +166,7 @@
     if (response.ok) {
       const data = await response.json();
       console.log('Upload Success', data);
+      router.push({ name: 'success', query: { card: fileName, ...props } });
     } else {
       console.error('Upload Failed');
     }
@@ -183,10 +203,33 @@
   watch(cardSubtitle, () => updateSVG('cardSubtitle'));
   watch(cardType, () => updateSVG('cardType'));
   watch(cardDescription, () => updateSVG('cardDescription'));
+  
+  function setVariables(svgText) {
+    const tmpElement = document.createElement('div');
+    tmpElement.innerHTML = svgText;
+    const titleElement = tmpElement.querySelector('#Card\\ Name');
+    cardTitle.value = titleElement ? titleElement.children[0].innerHTML : '';
+    const subTitleElement = tmpElement.querySelector('#Event');
+    cardSubtitle.value = subTitleElement ? subTitleElement.children[0].innerHTML : '';
+    const typeElement = tmpElement.querySelector('#Description');
+    cardType.value = typeElement ? typeElement.children[0].innerHTML : '';
+    const descriptionElement = tmpElement.querySelector('#DescriptionText');
+    cardDescription.value = getTextFromSVGTextElement(descriptionElement);
+  }
+
   // Load the SVG file
   const loadSVG = async () => {
-    const response = await fetch('/talisman_card.svg');
-    const text = await response.text();
+    let text = '';
+    const card = `talisman_card_${props.phone}_${props.name}.svg`;
+    const savedResponse = await fetch(`/api/get-card/?fileName=${card}`)
+    if (savedResponse.ok) {
+      text = await savedResponse.text();
+      setVariables(text);
+    } else {
+      const response = await fetch('/talisman_card.svg');
+      text = await response.text();
+    }
+    
     originalSVG.value = text; // Store the original SVG
     svgContent.value = text; // Set the initial SVG content
 
@@ -272,16 +315,16 @@
     const svg = svgContainer.value.querySelector('svg');
     switch(updateOnly) {
       case 'cardTitle':
-        svg.getElementById('Card Name').children[0].innerHTML = cardTitle as string;
+        if (svg) svg.getElementById('Card Name').children[0].innerHTML = cardTitle as string;
         return;
       case 'cardSubtitle':
-        svg.getElementById('Event').children[0].innerHTML = cardSubtitle as string;
+        if (svg) svg.getElementById('Event').children[0].innerHTML = cardSubtitle as string;
         return;
       case 'cardType':
-        svg.getElementById('Description').children[0].innerHTML = cardType as string;
+        if (svg) svg.getElementById('Description').children[0].innerHTML = cardType as string;
         return;
       case 'cardDescription':
-        svg.getElementById('DescriptionText').innerHTML = parseDescription(cardDescription) as string;
+        if (svg) svg.getElementById('DescriptionText').innerHTML = parseDescription(cardDescription) as string;
         return;
       default:
         // Create a new SVG string with updated values
@@ -547,8 +590,6 @@ form {
 </style>
 
 // TODO::display approved congrats in a nice way
-// TODO::edit picture functionality
-// 1) Add border to image + cursor resize on click on button "resize image"
-// 2) Allow to resize when clicked on border
-// 3) Remove border before uploading the image
-// TODO::improve typing performance
+/* TODO::edit picture functionality
+// 4) Resize and move on mobile
+*/

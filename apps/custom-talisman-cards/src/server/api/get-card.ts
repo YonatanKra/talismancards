@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
     // Return the SVG data URL
     return svgData;
   } catch (error) {
-    console.error('Error retrieving SVG:', error);
+    console.error('Error retrieving SVG:', error, params);
     throw createError({
       statusCode: 500,
       statusMessage: 'Failed to retrieve SVG'
