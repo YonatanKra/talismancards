@@ -90,12 +90,12 @@
           >
           <div slot="main" v-if="editingImage" class="image-editor-form">
             <vwc-text-field type="number"
-              label="Width"
+              label="רוחב"
               v-bind:current-value="imageWidth"
               @input="event => imageWidth = event.target.value"
             ></vwc-text-field>
             <vwc-text-field type="number"
-              label="Height"
+              label="גובה"
               v-bind:current-value="imageHeight"
               @input="event => imageHeight = event.target.value"
             ></vwc-text-field>
@@ -396,6 +396,9 @@
     resetImage();
     editingImage.value = false;
     const fileInput = event.target as HTMLInputElement;
+    if (fileInput.files.length > 1) {
+      fileInput.shadowRoot.querySelector('.remove-btn').click()
+    }
     if (fileInput.files && fileInput.files[0]) {
       const file = fileInput.files[0];
       const reader = new FileReader();
