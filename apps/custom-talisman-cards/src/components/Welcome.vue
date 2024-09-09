@@ -28,7 +28,6 @@
           type="submit" 
           :disabled="!isFormValid ? true : undefined"
         ></vwc-button>
-      {{ isFormValid }}
       </form>
     </div>
   </div>
