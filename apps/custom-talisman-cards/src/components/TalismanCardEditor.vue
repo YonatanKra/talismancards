@@ -7,7 +7,7 @@
         <!-- Card Title -->
         <vwc-text-field
           name="cardTitle"
-          placeholder="כותרת"
+          placeholder="כותרת הכרטיס"
           v-bind:current-value="cardTitle"
           @input="event => cardTitle = event.target.value"
         ></vwc-text-field>
@@ -23,7 +23,7 @@
         <!-- Card Type -->
         <vwc-text-field
           name="cardType"
-          placeholder="כותרת טקסט"
+          placeholder="כותרת הברכה"
           v-bind:current-value="cardType"
           @input="event => cardType = event.target.value"
         ></vwc-text-field>
@@ -31,7 +31,7 @@
         <!-- Description -->
         <vwc-text-area
           name="cardDescription"
-          placeholder="טקסט"
+          placeholder="הברכה"
           v-bind:current-value="cardDescription"
           @input="event => cardDescription = event.target.value"
         ></vwc-text-area>
@@ -293,10 +293,10 @@
 
   const router = useRouter();
   
-  const cardTitle = ref('כותרת');
-  const cardSubtitle = ref('תת כותרת');
-  const cardDescription = ref('טקסט');
-  const cardType = ref('כותרת טקסט');
+  const cardTitle = ref('');
+  const cardSubtitle = ref('');
+  const cardDescription = ref('');
+  const cardType = ref('');
   const svgContent = ref('');
   const originalSVG = ref('');
   const editingImage = ref(false);
