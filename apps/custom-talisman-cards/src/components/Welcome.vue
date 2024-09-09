@@ -9,12 +9,14 @@
         <vwc-text-field 
           name="name" 
           placeholder="שם" 
-          @input="checkFormValidity" 
+          v-bind:current-value="name"
+          @input="checkFormValidity"
           required
         ></vwc-text-field>
         <vwc-text-field
           name="phone" 
           placeholder="מספר טלפון" 
+          v-bind:current-value="phone"
           @input="checkFormValidity" 
           required
         ></vwc-text-field>
@@ -22,43 +24,45 @@
           appearance="filled" 
           connotation="cta" 
           label="נתחיל לברך" 
+          aria-label="נתחיל לברך"
           type="submit" 
-          :disabled="!isFormValid"
+          :disabled="!isFormValid ? true : undefined"
         ></vwc-button>
+      {{ isFormValid }}
       </form>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+  import { ref } from 'vue';
+  import { useRouter } from 'vue-router';
 
-const router = useRouter();
-const form = ref<HTMLFormElement | null>(null); // Reference to the form
-const isFormValid = ref(false); // Reactive property to track form validity
+  const router = useRouter();
+  const form = ref<HTMLFormElement | null>(null); // Reference to the form
+  const isFormValid = ref(false); // Reactive property to track form validity
+  const name = ref('');
+  const phone = ref('');
 
-// Method to check form validity
-const checkFormValidity = () => {
-  if (form.value) {
-    isFormValid.value = form.value.checkValidity(); // Check form validity
-  }
-};
+  const checkFormValidity = (e) => {
+    if (e.currentTarget.name === 'name') {
+      name.value = e.target.value;
+    } else {
+      phone.value = e.target.value;
+    }
+    if (form.value) {
+      isFormValid.value = form.value.checkValidity(); 
+    }
+  };
 
-const submitForm = () => {
-  if (form.value) {
-    // Access form data directly
-    const formData = new FormData(form.value);
-    const nameValue = formData.get('name') as string; // Get name from form data
-    const phoneValue = formData.get('phone') as string; // Get phone from form data
-
-    console.log(nameValue);
-    router.push({
-      name: 'editor',
-      query: { name: nameValue, phone: phoneValue },
-    });
-  }
-};
+  const submitForm = (event) => {
+    if (form.value) {
+      router.push({
+        name: 'editor',
+        query: { name: name.value, phone: phone.value },
+      });
+    }
+  };
 </script>
 
 <style scoped>
