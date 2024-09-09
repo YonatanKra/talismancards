@@ -1,127 +1,131 @@
 <template>
-  <div class="editor-container">
-    <div class="form-container">
-      <h1>היי {{ name }}, כאן יוצרים ברכת טאליסמן לאיתמר.</h1>
+    <vwc-header dir="rtl" alternate>
+      <div>
+        היי {{ name }}, כאן יוצרים ברכת טאליסמן לאיתמר.
+      </div>
+      <div class="editor-container" slot="app-content">
+        <div class="form-container">
+          <form ref="editorForm">
+            <!-- Card Title -->
+            <vwc-text-field
+              name="cardTitle"
+              placeholder="כותרת הכרטיס"
+              v-bind:current-value="cardTitle"
+              @input="event => cardTitle = event.target.value"
+            ></vwc-text-field>
 
-      <form ref="editorForm">
-        <!-- Card Title -->
-        <vwc-text-field
-          name="cardTitle"
-          placeholder="כותרת הכרטיס"
-          v-bind:current-value="cardTitle"
-          @input="event => cardTitle = event.target.value"
-        ></vwc-text-field>
+            <!-- Subtitle -->
+            <vwc-text-field
+              name="cardSubtitle"
+              placeholder="תת כותרת"
+              v-bind:current-value="cardSubtitle"
+              @input="event => cardSubtitle = event.target.value"
+            ></vwc-text-field>
 
-        <!-- Subtitle -->
-        <vwc-text-field
-          name="cardSubtitle"
-          placeholder="תת כותרת"
-          v-bind:current-value="cardSubtitle"
-          @input="event => cardSubtitle = event.target.value"
-        ></vwc-text-field>
+            <!-- Card Type -->
+            <vwc-text-field
+              name="cardType"
+              placeholder="כותרת הברכה"
+              v-bind:current-value="cardType"
+              @input="event => cardType = event.target.value"
+            ></vwc-text-field>
 
-        <!-- Card Type -->
-        <vwc-text-field
-          name="cardType"
-          placeholder="כותרת הברכה"
-          v-bind:current-value="cardType"
-          @input="event => cardType = event.target.value"
-        ></vwc-text-field>
+            <!-- Description -->
+            <vwc-text-area
+              name="cardDescription"
+              placeholder="הברכה"
+              v-bind:current-value="cardDescription"
+              @input="event => cardDescription = event.target.value"
+            ></vwc-text-area>
 
-        <!-- Description -->
-        <vwc-text-area
-          name="cardDescription"
-          placeholder="הברכה"
-          v-bind:current-value="cardDescription"
-          @input="event => cardDescription = event.target.value"
-        ></vwc-text-area>
+            <vwc-file-picker
+              label="החלפת תמונת הכרטיס"
+              name="userImage"
+              @change="handleFileUpload"
+              accept="image/*">
+              אפשר לגרור תמונה לפה או ללחוץ כדי לבחור תמונה מהמחשב
+            </vwc-file-picker>
 
-        <input
-          type="file"
-          name="userImage"
-          @change="handleFileUpload"
-          accept="image/*"
-        />
+            <vwc-button
+              appearance="filled"
+              connotation="cta"
+              label="שליחת ברכה"
+              @click="uploadSVG"
+            ></vwc-button>
+          </form>
+        </div>
 
-        <vwc-button
-          appearance="filled"
-          connotation="cta"
-          label="שליחת ברכה"
-          @click="uploadSVG"
-        ></vwc-button>
-      </form>
-    </div>
+        <div v-show="editingImage" 
+            ref="imageEditor" 
+            id="image-editor-border">
+            <div class="corner-square" 
+                style="grid-area: top-left; cursor: nwse-resize; margin: -10px;" 
+                @mousedown="startResize('top-left')"></div>
+            <div class="rectangle" style="grid-area: top; cursor: ns-resize; margin: -10px 0;" @mousedown="startResize('top')"></div>
+            <div class="corner-square" 
+                style="grid-area: top-right; cursor: nesw-resize; margin: -10px;" 
+                @mousedown="startResize('top-right')"></div>
+            
+            <div class="rectangle" style="grid-area: left; cursor: ew-resize; margin: 0 -10px;" @mousedown="startResize('left')"></div>
+            <div style="grid-area: empty; background: transparent;" 
+                @mousedown="startDrag"></div>
+            <div class="rectangle" style="grid-area: right; cursor: ew-resize; margin: 0 -10px;" @mousedown="startResize('right')"></div>
+            
+            <div class="corner-square" 
+                style="grid-area: bottom-left; cursor: nesw-resize; margin: -10px;" 
+                @mousedown="startResize('bottom-left')"></div>
+            <div class="rectangle" style="grid-area: bottom; cursor: ns-resize; margin: -10px 0;" @mousedown="startResize('bottom')"></div>
+            <div class="corner-square" 
+                style="grid-area: bottom-right; cursor: nwse-resize; margin: -10px;" 
+                @mousedown="startResize('bottom-right')"></div>
+        </div>
 
-    <div v-show="editingImage" 
-         ref="imageEditor" 
-         id="image-editor-border">
-        <div class="corner-square" 
-             style="grid-area: top-left; cursor: nwse-resize; margin: -10px;" 
-             @mousedown="startResize('top-left')"></div>
-        <div class="rectangle" style="grid-area: top; cursor: ns-resize; margin: -10px 0;" @mousedown="startResize('top')"></div>
-        <div class="corner-square" 
-             style="grid-area: top-right; cursor: nesw-resize; margin: -10px;" 
-             @mousedown="startResize('top-right')"></div>
-        
-        <div class="rectangle" style="grid-area: left; cursor: ew-resize; margin: 0 -10px;" @mousedown="startResize('left')"></div>
-        <div style="grid-area: empty; background: transparent;" 
-             @mousedown="startDrag"></div>
-        <div class="rectangle" style="grid-area: right; cursor: ew-resize; margin: 0 -10px;" @mousedown="startResize('right')"></div>
-        
-        <div class="corner-square" 
-             style="grid-area: bottom-left; cursor: nesw-resize; margin: -10px;" 
-             @mousedown="startResize('bottom-left')"></div>
-        <div class="rectangle" style="grid-area: bottom; cursor: ns-resize; margin: -10px 0;" @mousedown="startResize('bottom')"></div>
-        <div class="corner-square" 
-             style="grid-area: bottom-right; cursor: nwse-resize; margin: -10px;" 
-             @mousedown="startResize('bottom-right')"></div>
-    </div>
+        <!-- Load SVG -->
 
-    <!-- Load SVG -->
-
-    <div class="card-preview">
-      <vwc-alert
-        v-bind:open="editingImage"
-        class="image-edit-alert"
-        placement="bottom"
-      >
-      <div slot="main" v-if="editingImage" class="image-editor-form">
-        <vwc-text-field type="number"
-          label="Width"
-          v-bind:current-value="imageWidth"
-          @input="event => imageWidth = event.target.value"
-        ></vwc-text-field>
-        <vwc-text-field type="number"
-          label="Height"
-          v-bind:current-value="imageHeight"
-          @input="event => imageHeight = event.target.value"
-        ></vwc-text-field>
-        <vwc-text-field type="number"
-          label="X"
-          v-bind:current-value="imageX"
-          @input="event => imageX = event.target.value"
-        ></vwc-text-field>
-        <vwc-text-field type="number"
-          label="Y"
-          v-bind:current-value="imageY"
-          @input="event => imageY = event.target.value"
-        ></vwc-text-field>
-        <div class="full-width">
-          <vwc-button connotation="alert" label="אתחול גודל תמונה" @click="resetImage"></vwc-button>
-          <vwc-button connotation="alert" label="סיום עריכת תמונה" @click="endImageEdit"></vwc-button>
+        <div class="card-preview">
+          <vwc-alert
+            v-bind:open="editingImage"
+            class="image-edit-alert"
+            placement="bottom"
+          >
+          <div slot="main" v-if="editingImage" class="image-editor-form">
+            <vwc-text-field type="number"
+              label="Width"
+              v-bind:current-value="imageWidth"
+              @input="event => imageWidth = event.target.value"
+            ></vwc-text-field>
+            <vwc-text-field type="number"
+              label="Height"
+              v-bind:current-value="imageHeight"
+              @input="event => imageHeight = event.target.value"
+            ></vwc-text-field>
+            <vwc-text-field type="number"
+              label="X"
+              v-bind:current-value="imageX"
+              @input="event => imageX = event.target.value"
+            ></vwc-text-field>
+            <vwc-text-field type="number"
+              label="Y"
+              v-bind:current-value="imageY"
+              @input="event => imageY = event.target.value"
+            ></vwc-text-field>
+            <div class="full-width">
+              <vwc-button connotation="alert" label="אתחול גודל תמונה" @click="resetImage"></vwc-button>
+              <vwc-button connotation="alert" label="סיום עריכת תמונה" @click="endImageEdit"></vwc-button>
+            </div>
+          </div>
+        </vwc-alert>
+          
+          <div v-if="editingImage" class="full-width">
+            <vwc-button appearance="filled" connotation="accent" label="אתחול גודל תמונה" @click="resetImage"></vwc-button>
+            <vwc-button appearance="filled" connotation="success" label="סיום עריכת תמונה" @click="endImageEdit"></vwc-button>
+          </div>
+          <vwc-button appearance="filled" connotation="accent" v-else="editingImage" label="עריכת תמונה" @click="editImage"></vwc-button>
+          <div ref="svgContainer" v-html="svgContent" class="svg-container"></div>
         </div>
       </div>
-    </vwc-alert>
-      
-      <div v-if="editingImage" class="full-width">
-        <vwc-button connotation="alert" label="יציאה מעריכת תמונה" @click="editImage"></vwc-button>
-        <vwc-button connotation="alert" label="אתחול גודל תמונה" @click="resetImage"></vwc-button>
-        <vwc-button connotation="alert" label="סיום עריכת תמונה" @click="endImageEdit"></vwc-button>
-      </div>
-      <vwc-button v-else="editingImage" connotation="success" label="עריכת תמונה" @click="editImage"></vwc-button>
-      <div ref="svgContainer" v-html="svgContent" class="svg-container"></div>
-    </div>
-  </div>
+
+    </vwc-header>
 </template>
 
 <script setup lang="ts">
@@ -547,6 +551,20 @@
 </script>
 
 <style scoped>
+
+body {
+  margin: 0;
+}
+
+vwc-header {
+  width: 100%;
+}
+
+.app-content {
+  display: flex;
+  gap: 16px;
+}
+
 .image-editor-form {
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* Two columns */
@@ -568,6 +586,7 @@
     'left empty right'
     'bottom-left bottom bottom-right';
   border: 4px dashed #999; 
+  direction: ltr;
 }
 
 h1 {
@@ -580,6 +599,7 @@ h1 {
   flex-direction: column; /* Default to column for larger screens */
   align-items: flex-start; /* Center items */
   gap: 20px; /* Space between form and card */
+  padding-top: 32px;
 }
 
 .form-container {
@@ -596,9 +616,6 @@ form {
 }
 
 .card-preview {
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin-top: 20px;
   width: 100%; /* Full width */
   max-width: 500px; /* Limit width for card */
   height: auto; /* Allow height to adjust */
@@ -615,6 +632,7 @@ form {
   display: flex; /* Use flex to center the SVG */
   justify-content: center; /* Center horizontally */
   align-items: center; /* Center vertically */
+  direction: ltr;
 }
 
 .svg-container svg {
@@ -637,7 +655,7 @@ form {
     display: flex;
     flex-direction: row;
     column-gap: 10px;
-    flex-flow: wrap;
+    flex-flow: column;
   }
 }
 

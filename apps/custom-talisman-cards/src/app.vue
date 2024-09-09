@@ -3,6 +3,8 @@
 </script>
 
 <template>
+  <link href='https://fonts.googleapis.com/css?family=Assistant' rel='stylesheet'>
+
   <main class="vvd-root">
     <header>
       
