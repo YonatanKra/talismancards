@@ -692,3 +692,7 @@ form {
 </style>
 
 // TODO::display approved congrats in a nice way
+/* TODO::telephone number validation:
+//  1. type="tel"
+//  2. min and max length + custom error on validation 
+*/
