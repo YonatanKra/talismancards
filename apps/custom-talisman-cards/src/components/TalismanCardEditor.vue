@@ -8,6 +8,7 @@
           <form ref="editorForm">
             <!-- Card Title -->
             <vwc-text-field
+              maxlength="16"
               name="cardTitle"
               placeholder="כותרת הכרטיס"
               v-bind:current-value="cardTitle"
@@ -16,6 +17,7 @@
 
             <!-- Subtitle -->
             <vwc-text-field
+              maxlength="15"
               name="cardSubtitle"
               placeholder="תת כותרת"
               v-bind:current-value="cardSubtitle"
@@ -24,6 +26,7 @@
 
             <!-- Card Type -->
             <vwc-text-field
+              maxlength="10"
               name="cardType"
               placeholder="כותרת הברכה"
               v-bind:current-value="cardType"
@@ -131,6 +134,12 @@
 <script setup lang="ts">
   import { ref, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
+
+  function countSubstr(str, substr) {
+    const regex = new RegExp(substr, 'g'); // Create a global regex for the substring
+    const matches = str.match(regex); // Get all matches
+    return matches ? matches.length : 0; // Return the count or 0 if no matches
+  }
 
   function setVariables(svgText) {
     const tmpElement = document.createElement('div');
@@ -353,8 +362,8 @@
     const descriptionLines = cardDescription.split('\n');
     const maxWidth = 325;
     const maxLines = 7;
-    return descriptionLines
-      .map((line) => {
+    const lines = descriptionLines
+      .map((line, index, array) => {
         // Split the line into words
         const words = line.split(' ');
         let currentLine = '';
@@ -377,12 +386,6 @@
           lines.push(currentLine.trim());
         }
 
-        // Add ellipsis if the number of lines exceeds a certain limit
-        if (lines.length > maxLines) {
-          lines = lines.slice(0, 3); // Limit to 3 lines
-          lines[2] += '...'; // Add ellipsis to the last line
-        }
-
         return lines
           .map((line, index) => {
             return `<tspan x="50%" dy="25" text-anchor="middle">${line}</tspan>`;
@@ -390,6 +393,20 @@
           .join('');
       })
       .join('');
+    
+    if (countSubstr(lines, '<tspan') > maxLines) {
+      let index = -1;
+      let count = 0;
+      while (count < maxLines) {
+          index = lines.indexOf('<tspan', index + 1);
+          if (index === -1) break; // If no more occurrences are found
+          count++;
+      }
+      let part1 = lines.slice(0, index);
+      return part1 += `<tspan x="50%" dy="25" text-anchor="middle">...</tspan>`
+    }
+
+    return lines;
   }
 
   const handleFileUpload = (event: Event) => {
