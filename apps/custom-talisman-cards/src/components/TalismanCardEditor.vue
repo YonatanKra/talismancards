@@ -325,6 +325,7 @@
   const imageX = ref(0);
   const imageY = ref(0);
 
+  watch(svgContent, () => requestAnimationFrame(() => updateSVG('cardDescription')))
   watch(cardTitle, () => updateSVG('cardTitle'));
   watch(cardSubtitle, () => updateSVG('cardSubtitle'));
   watch(cardType, () => updateSVG('cardType'));
@@ -457,7 +458,10 @@
         if (svg) svg.getElementById('Description').children[0].innerHTML = cardType as string;
         return;
       case 'cardDescription':
-        if (svg) svg.getElementById('DescriptionText').innerHTML = parseDescription(cardDescription) as string;
+        if (svg) {
+          svg.querySelector('title').textContent = cardDescription as string;
+          svg.getElementById('DescriptionText').innerHTML = parseDescription(cardDescription) as string;
+        }
         return;
       default:
         // Create a new SVG string with updated values
@@ -471,6 +475,7 @@
           parseDescription(cardDescription)
         );
 
+        updatedSVG = updatedSVG.replace(/<title>.*?<\/title>/, `<title>${cardDescription}</title>`);
         if (uploadedImage.value) {
           updatedSVG = replaceImageInSVG(updatedSVG, uploadedImage.value, 'img4');
         }
