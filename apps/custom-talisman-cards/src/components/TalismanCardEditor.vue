@@ -26,7 +26,7 @@
 
             <!-- Card Type -->
             <vwc-text-field
-              maxlength="10"
+              maxlength="20"
               name="cardType"
               placeholder="כותרת הברכה"
               v-bind:current-value="cardType"
