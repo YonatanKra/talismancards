@@ -151,7 +151,12 @@
     const typeElement = tmpElement.querySelector('#Description');
     cardType.value = typeElement ? typeElement.children[0].innerHTML : '';
     const descriptionElement = tmpElement.querySelector('#DescriptionText');
-    cardDescription.value = getTextFromSVGTextElement(descriptionElement);
+    const svgTitleElement = tmpElement.querySelector('title');
+    if (svgTitleElement.textContent && svgTitleElement.textContent !== 'Talisman Adventure Card Template') {
+      cardDescription.value = svgTitleElement.textContent;
+    } else {
+      cardDescription.value = getTextFromSVGTextElement(descriptionElement);
+    }
   }
 
   function matchElementsDimenstions(element1, element2) {
