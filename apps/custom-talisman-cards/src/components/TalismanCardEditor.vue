@@ -1,7 +1,7 @@
 <template>
     <vwc-header dir="rtl" alternate>
       <div>
-        היי {{ name }}, כאן יוצרים ברכת טאליסמן לאיתמר.
+        היי {{ name }}, כאן יוצרים ברכת טאליסמן לאיתמר. לא לשכוח להחליף את תמונת הכרטיס...
       </div>
       <div class="editor-container" slot="app-content">
         <div class="form-container">
