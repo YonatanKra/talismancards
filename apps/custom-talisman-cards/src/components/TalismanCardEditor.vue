@@ -8,7 +8,7 @@
           <form ref="editorForm">
             <!-- Card Title -->
             <vwc-text-field
-              maxlength="16"
+              maxlength="21"
               name="cardTitle"
               placeholder="כותרת הכרטיס"
               v-bind:current-value="cardTitle"
@@ -454,7 +454,12 @@
     const svg = svgContainer.value.querySelector('svg');
     switch(updateOnly) {
       case 'cardTitle':
-        if (svg) svg.getElementById('Card Name').children[0].innerHTML = cardTitle as string;
+        if (svg) {
+          if (cardTitle.length > 16) {
+            (svg.getElementById('Card Name').children[0] as HTMLElement).style.fontSize = '30px';
+          }
+          svg.getElementById('Card Name').children[0].innerHTML = cardTitle as string;
+        }
         return;
       case 'cardSubtitle':
         if (svg) svg.getElementById('Event').children[0].innerHTML = cardSubtitle as string;
