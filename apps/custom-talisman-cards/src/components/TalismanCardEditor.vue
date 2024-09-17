@@ -276,6 +276,11 @@
 
   const uploadSVG = async () => {
     endImageEdit();
+    const userImage = svgContainer.value.querySelector('svg')?.getElementById('img4');
+    if (userImage?.classList.contains('original-image')) {
+      editorForm.value.querySelector('vwc-file-picker').errorText = 'בבקשה להעלות תמונה חדשה';
+      return;
+    }
     const fileName = `talisman_card_${props.phone}_${props.name}.svg`; // Unique file name
 
     const response = await fetch('/api/upload', {
@@ -427,6 +432,7 @@
       const reader = new FileReader();
       reader.onload = (e) => {
         uploadedImage.value = e.target?.result as string; // Store the Base64 image data
+        (editorForm.value?.querySelector('vwc-file-picker')) ? editorForm.value.querySelector('vwc-file-picker').errorText = undefined : '';
         updateSVG(); // Update the SVG to include the uploaded image
       };
       reader.readAsDataURL(file); // Read the file as a data URL
@@ -501,6 +507,7 @@
     const image = div.querySelector(`#${imageId}`);
     if (image) {
       image.setAttribute('href', imgValue);
+      image.classList.toggle('original-image', false);
     }
     return div.innerHTML;
   }
@@ -723,6 +730,7 @@ form {
 }
 </style>
 
+// TODO::replace the `title` with a `tooltip`
 // TODO::display approved congrats in a nice way
 /* TODO::telephone number validation:
 //  1. type="tel"
