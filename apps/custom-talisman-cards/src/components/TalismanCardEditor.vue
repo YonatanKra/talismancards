@@ -54,6 +54,7 @@
               connotation="cta"
               label="שליחת ברכה"
               @click="uploadSVG"
+              v-bind:disabled="!isImageReplaced"
             ></vwc-button>
           </form>
         </div>
@@ -132,7 +133,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted, computed } from 'vue';
   import { useRouter } from 'vue-router';
 
   function countSubstr(str, substr) {
@@ -244,7 +245,7 @@
 
   const endImageEdit = async () => {
     editingImage.value = false;
-    const svg = svgContainer.value.querySelector('svg');
+    const svg = svgContainer.value?.querySelector('svg');
     svgContent.value = svg.outerHTML;
   };
 
@@ -274,10 +275,15 @@
     }
   }
 
+  const isNewImage = () => {
+    if (!svgContainer.value) return false;
+    const userImage = svgContainer.value.querySelector('svg')?.getElementById('img4');
+    return !userImage?.classList.contains('original-image');
+  }
+
   const uploadSVG = async () => {
     endImageEdit();
-    const userImage = svgContainer.value.querySelector('svg')?.getElementById('img4');
-    if (userImage?.classList.contains('original-image')) {
+    if (!isNewImage()) {
       editorForm.value.querySelector('vwc-file-picker').errorText = 'בבקשה להעלות תמונה חדשה';
       return;
     }
@@ -316,6 +322,7 @@
 
   const router = useRouter();
   
+  const isImageReplaced = ref(false);
   const cardTitle = ref('');
   const cardSubtitle = ref('');
   const cardDescription = ref('');
@@ -335,7 +342,10 @@
   const imageX = ref(0);
   const imageY = ref(0);
 
-  watch(svgContent, () => requestAnimationFrame(() => updateSVG('cardDescription')))
+  watch(svgContent, () => requestAnimationFrame(() => {
+    updateSVG('cardDescription');
+    isImageReplaced.value = isNewImage();
+  }))
   watch(cardTitle, () => updateSVG('cardTitle'));
   watch(cardSubtitle, () => updateSVG('cardSubtitle'));
   watch(cardType, () => updateSVG('cardType'));
