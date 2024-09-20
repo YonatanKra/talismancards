@@ -52,7 +52,7 @@
             <vwc-button
               appearance="filled"
               connotation="cta"
-              label="שליחת ברכה"
+              v-bind:label="isImageReplaced ? 'שליחת ברכה' : 'נא להחליף תמונה בשדה מעליי בבקשה'"
               @click="uploadSVG"
               v-bind:disabled="!isImageReplaced"
             ></vwc-button>
