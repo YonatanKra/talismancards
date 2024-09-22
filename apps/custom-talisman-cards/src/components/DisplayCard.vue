@@ -1,19 +1,27 @@
 <template>
     <div class="card">
-        <h2>איחולים מ:<br/>{{ card.fileName.split('_')[3].replace('.svg', '') }}</h2   >
-        <img height="100%" :src="`https://talismancards.s3.us-east-2.amazonaws.com/images/${card.fileName}`" /> 
+        <vwc-toggletip class="text"
+                       placement="left"
+                       :open="toggleTipOpen"
+                       v-html="card.title.replace('\n', '<br/>')" 
+                       :headline="card.fileName.split('_')[3].replace('.svg', '')" 
+                       :anchor="image"></vwc-toggletip>
+        <img @mouseover="toggleTipOpen = true" @mouseout="toggleTipOpen = false" ref="image" slot="anchor" height="100%" :src="`https://talismancards.s3.us-east-2.amazonaws.com/images/${card.fileName}`" /> 
+        
     </div>
   </template>
   
 <script setup lang="ts">
+import { ref } from 'vue';
+
     const props = defineProps({
         card: {
             type: Object,
             default: {title: 'DemoCard', fileName: '#'},
         },
     });
-
-    const svgContent = ref('');
+    const image = ref<HTMLImageElement | null>(null);
+    const toggleTipOpen = ref(false);
 </script>
 
 <style>
@@ -22,7 +30,9 @@
         justify-content: center;
     }
 
-    .card h2 {
+    .text {
+        max-width: 500px;
         direction: rtl; text-align: center;
+        font-size: 2em;
     }
 </style>

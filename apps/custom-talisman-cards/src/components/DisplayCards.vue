@@ -1,5 +1,5 @@
 <template>
-    <div class="slideshow">
+    <div class="slideshow" @keydown="handleKeyDown" tabindex="0">
         <Transition name="slide-fade">
             <div :key="currentCardIndex" class="card-wrapper" v-if="cards.length">
                 <DisplayCard :card="cards[currentCardIndex]" />
@@ -19,10 +19,17 @@
     const intervalTime = 5000;
     let intervalId = setTimeout(() => {});
 
-    const nextCard = () => {
-        currentCardIndex.value = (currentCardIndex.value + 1) % cards.value.length;
+    const nextCard = (next = 1) => {
+        currentCardIndex.value = (currentCardIndex.value + next) % cards.value.length;
     };
 
+    function handleKeyDown(e: KeyboardEvent) {
+        if (e.key === 'ArrowRight') {
+            nextCard();
+        } else if (e.key === 'ArrowLeft') {
+            nextCard(-1);
+        }
+    }
     async function listSVGs() {
         try {
             const response = await fetch(`/api/list-cards`);
@@ -67,6 +74,7 @@
         width: 100%; /* Adjust as needed */
         height: 100vh; /* Set a specific height */
         overflow: hidden;
+        outline: none;
     }
 
     .card-wrapper {
