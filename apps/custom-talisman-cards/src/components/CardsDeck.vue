@@ -19,9 +19,9 @@ deck.cards.forEach(function (card, i) {
 });
 
 function shuffle() {
-    deck.shuffle();
-    deck.shuffle();
-    deck.shuffle();
+  deck.shuffle();
+  deck.shuffle();
+  deck.shuffle();
 }
 
 function fan() {
@@ -29,36 +29,95 @@ function fan() {
 }
 
 function flip() {
-    deck.flip();
+  deck.flip();
 }
-/**
- * hearts, spades, clubs, diamonds - 1 to 13
- * .card.spades.rank1 .face {
-        background-image: url("faces/0_1.svg");
+
+let draggedElement = null;
+
+function getTransformValuesFromElement(element: HTMLElement) {
+  const transform = element.style.transform;
+
+  if (transform !== 'none') {
+    // Regular expression to match translate and rotate values
+    const translateMatch = transform.match(/translate\(([^)]+)\)/);
+    const rotateMatch = transform.match(/rotate\(([^)]+)\)/);
+
+    let translateX = 0;
+    let translateY = 0;
+    let rotateValue = '0';
+
+    if (translateMatch) {
+      const translateValues = translateMatch[1]
+        .split(',')
+        .map((value) => value.trim());
+      translateX = parseFloat(translateValues[0]); // Extract translateX
+      translateY = parseFloat(translateValues[1]); // Extract translateY
+      console.log('Translate X:', translateX);
+      console.log('Translate Y:', translateY);
+    } else {
+      console.log('No translate found in the transform property.');
     }
- */
+
+    if (rotateMatch) {
+      rotateValue = rotateMatch[1]; // This will be the value in degrees
+      console.log('Rotation value:', rotateValue); // e.g., "130deg"
+
+      // If you want to convert it to a number
+      const rotateDegrees = parseFloat(rotateValue); // This will give you 130
+      console.log('Rotation in degrees:', rotateDegrees);
+    } else {
+      console.log('No rotation found in the transform property.');
+    }
+    return { translateX, translateY, rotateValue };
+  } else {
+    console.log('No transform applied to the element.');
+  }
+}
+
+function overrideMouseMoveListener(e: MouseEvent) {
+  if (!draggedElement) return;
+  const { translateX, translateY, rotateValue } =
+    getTransformValuesFromElement(draggedElement);
+
+  draggedElement.style['transform'] = `translate(${translateX / 2}px, ${
+    translateY / 2
+  }px) rotate(${rotateValue})`;
+}
+
 onMounted(async () => {
   try {
     let currentValueIndex = 0;
     let style = '';
     cards.value = await listSVGs();
-    ['spades', 'hearts', 'clubs', 'diamonds'].forEach(type => {
-        for (let i = 1; i <= 13; i++) {
-            if (currentValueIndex >= cards.value.length) {
-                style += `.card.${type}.rank${i} {
+    ['spades', 'hearts', 'clubs', 'diamonds'].forEach((type) => {
+      for (let i = 1; i <= 13; i++) {
+        if (currentValueIndex >= cards.value.length) {
+          style += `.card.${type}.rank${i} {
                     display: none;
                 }`;
-            } else {
-                style += `.card.${type}.rank${i} .face {
-                    background-image: url("https://talismancards.s3.us-east-2.amazonaws.com/images/${cards.value[currentValueIndex++].fileName}");
+        } else {
+          style += `.card.${type}.rank${i} .face {
+                    background-image: url("https://talismancards.s3.us-east-2.amazonaws.com/images/${
+                      cards.value[currentValueIndex++].fileName
+                    }");
                 }`;
-            }
         }
+      }
     });
     const styleElement = document.createElement('style');
     styleElement.textContent = style;
     container.value.appendChild(styleElement);
     deck.mount(container.value);
+    window.addEventListener('mouseup', () => {
+      draggedElement = null;
+      window.removeEventListener('mousemove', overrideMouseMoveListener);
+    });
+    deck.cards.forEach((card) => {
+      card.$el.addEventListener('mousedown', (e) => {
+        draggedElement = e.target.parentElement;
+        window.addEventListener('mousemove', overrideMouseMoveListener);
+      });
+    });
     deck.intro();
     shuffle();
   } catch (error) {
@@ -92,6 +151,7 @@ onMounted(async () => {
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
   cursor: default;
   will-change: transform;
+  scale: 2;
 }
 
 .card:before,
