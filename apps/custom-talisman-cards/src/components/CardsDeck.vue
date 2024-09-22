@@ -130,7 +130,7 @@ onMounted(async () => {
 
 .card .back {
   position: absolute;
-  background-image: url('faces/back.webp');
+  background-image: url('/faces/back.webp');
   background-position: 50% 50%;
   background-size: 100% 100%;
   background-repeat: no-repeat;
