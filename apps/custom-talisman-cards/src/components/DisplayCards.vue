@@ -1,26 +1,31 @@
 <template>
-    <div class="display-cards">
-        <DisplayCard 
-            v-for="card in cards" 
-            :key="card"
-            :card="card" 
-            />
+    <div class="slideshow">
+        <Transition name="slide-fade">
+            <div :key="currentCardIndex" class="card" v-if="cards.length">
+                <DisplayCard :card="cards[currentCardIndex]" />
+            </div>
+        </Transition>
     </div>
+    
   </template>
   
   <script setup lang="ts">
     
+    import { onBeforeUnmount, onMounted, ref } from 'vue';
     import { useRoute } from 'vue-router';
 
     const cards = ref([]);
+    const currentCardIndex = ref(0);
+    const intervalTime = 5000;
+    let intervalId = setTimeout(() => {});
 
-    async function listSVGs(phoneNumber, name) {
+    const nextCard = () => {
+        currentCardIndex.value = (currentCardIndex.value + 1) % cards.value.length;
+    };
+
+    async function listSVGs() {
         try {
-            const response = await fetch(
-            `/api/list-cards?phoneNumber=${encodeURIComponent(
-                phoneNumber
-            )}&name=${encodeURIComponent(name)}`
-            );
+            const response = await fetch(`/api/list-cards`);
 
             if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -36,16 +41,58 @@
 
     onMounted(async () => {
         try {
-            cards.value = await listSVGs(phone, name);
-            console.log('Matching SVG files:', cards);
+            cards.value = await listSVGs();
+            intervalId = setInterval(nextCard, intervalTime);
         } catch (error) {
             console.error('Failed to list SVGs:', error);
         }
     });
     
 
+    onBeforeUnmount(() => {
+        if (intervalId) {
+            clearInterval(intervalId);
+        }
+    });
     const route = useRoute();
     const name = route.query.name || 'card';
     const phone = route.query.phone || 'talisman';
   </script>
+
+<style scoped>
+    .slideshow {
+        display: flex; /* Use flexbox for layout */
+        justify-content: center; /* Center the card horizontally */
+        align-items: center; /* Center the card vertically */
+        width: 100%; /* Adjust as needed */
+        height: 100vh; /* Set a specific height */
+        overflow: hidden;
+    }
+
+    .card {
+        position: absolute;
+        top: 20px;
+        width: 100%; /* Adjust as needed */
+        height: auto; /* Or set a specific height */
+        transition: opacity 0.5s ease, transform 0.5s ease; /* Adjust timing as needed */
+    }
+
+    .slide-fade-enter-active {
+        transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
+    }
+
+    .slide-fade-leave-active {
+        transition: all 0.6s cubic-bezier(1, 0.5, 0.8, 1);
+    }
+
+    .slide-fade-enter-from {
+        transform: translateX(130px);
+        opacity: 0;
+    }
+    
+    .slide-fade-leave-to {
+        transform: translateX(-130px);
+        opacity: 0;
+    }
+</style>
   

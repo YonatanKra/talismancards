@@ -1,18 +1,7 @@
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { defineEventHandler, getQuery, createError, setHeader } from "h3";
 
-export default defineEventHandler(async (event) => {
-  const query = getQuery(event);
-  const fileName = query.fileName;
-
-  if (!fileName) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Missing fileName parameter'
-    });
-  }
-
-  // Configure AWS S3
+export async function getCard(fileName: string) {
   const s3Client = new S3Client({
     credentials: {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -36,9 +25,6 @@ export default defineEventHandler(async (event) => {
     
     const svgData = await data.Body.transformToString();
 
-    // Set the correct content type for SVG
-    setHeader(event, 'Content-Type', 'image/svg+xml');
-    
     // Return the SVG data URL
     return svgData;
   } catch (error) {
@@ -48,4 +34,18 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Failed to retrieve SVG'
     });
   }
+}
+
+export default defineEventHandler(async (event) => {
+  const query = getQuery(event);
+  const fileName = query.fileName;
+
+  if (!fileName) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Missing fileName parameter'
+    });
+  }
+
+  return getCard(fileName as string);
 });

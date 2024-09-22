@@ -302,7 +302,6 @@
 
     if (response.ok) {
       const data = await response.json();
-      console.log('Upload Success', data);
       router.push({ name: 'success', query: { card: fileName, ...props } });
     } else {
       console.error('Upload Failed');
