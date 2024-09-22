@@ -1,6 +1,7 @@
 <template>
-  <vwc-button label="shuffle" @click="shuffle"></vwc-button>
-  <vwc-button label="fan" @click="fan"></vwc-button>
+  <vwc-button label="Shuffle" @click="shuffle"></vwc-button>
+  <vwc-button label="Fan" @click="fan"></vwc-button>
+  <vwc-button label="Flip" @click="flip"></vwc-button>
   <div ref="container" id="container"></div>
 </template>
 
@@ -11,14 +12,14 @@ import { listSVGs } from '../components/svgGetter.js';
 const cards = ref([]);
 const container = ref<HTMLDivElement | null>(null);
 
-const deck = Deck(true);
+const deck = Deck(false);
 deck.cards.forEach(function (card, i) {
   card.enableDragging();
   card.enableFlipping();
 });
 
 function shuffle() {
-    deck.intro()
+    deck.shuffle();
     deck.shuffle();
     deck.shuffle();
 }
@@ -27,10 +28,39 @@ function fan() {
   deck.fan();
 }
 
+function flip() {
+    deck.flip();
+}
+/**
+ * hearts, spades, clubs, diamonds - 1 to 13
+ * .card.spades.rank1 .face {
+        background-image: url("faces/0_1.svg");
+    }
+ */
 onMounted(async () => {
   try {
+    let currentValueIndex = 0;
+    let style = '';
     cards.value = await listSVGs();
+    ['spades', 'hearts', 'clubs', 'diamonds'].forEach(type => {
+        for (let i = 1; i <= 13; i++) {
+            if (currentValueIndex >= cards.value.length) {
+                style += `.card.${type}.rank${i} {
+                    display: none;
+                }`;
+            } else {
+                style += `.card.${type}.rank${i} .face {
+                    background-image: url("https://talismancards.s3.us-east-2.amazonaws.com/images/${cards.value[currentValueIndex++].fileName}");
+                }`;
+            }
+        }
+    });
+    const styleElement = document.createElement('style');
+    styleElement.textContent = style;
+    container.value.appendChild(styleElement);
     deck.mount(container.value);
+    deck.intro();
+    shuffle();
   } catch (error) {
     console.error('Failed to list SVGs:', error);
   }
