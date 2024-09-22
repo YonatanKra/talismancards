@@ -13,6 +13,7 @@
     
     import { onBeforeUnmount, onMounted, ref } from 'vue';
     import { useRoute } from 'vue-router';
+    import { listSVGs } from './svgGetter.js';
 
     const cards = ref([]);
     const currentCardIndex = ref(0);
@@ -30,21 +31,8 @@
             nextCard(-1);
         }
     }
-    async function listSVGs() {
-        try {
-            const response = await fetch(`/api/list-cards`);
-
-            if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const fileNames = await response.json();
-            return fileNames;
-        } catch (error) {
-            console.error('Error listing SVGs:', error);
-            throw error;
-        }
-    }
+    
+    
 
     onMounted(async () => {
         try {

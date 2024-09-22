@@ -6,7 +6,8 @@
   "private": true,
   "dependencies": {
     "@aws-sdk/client-s3": "^3.645.0",
-    "@vonage/vivid-vue": "^4.5.0"
+    "@vonage/vivid-vue": "^4.5.0",
+    "deck-of-cards": "^0.1.8"
   },
   "devDependencies": {
     "@nuxt/devtools": "^1.4.1",
