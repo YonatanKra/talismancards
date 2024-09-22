@@ -1,7 +1,7 @@
 <template>
     <div class="slideshow">
         <Transition name="slide-fade">
-            <div :key="currentCardIndex" class="card" v-if="cards.length">
+            <div :key="currentCardIndex" class="card-wrapper" v-if="cards.length">
                 <DisplayCard :card="cards[currentCardIndex]" />
             </div>
         </Transition>
@@ -69,11 +69,11 @@
         overflow: hidden;
     }
 
-    .card {
+    .card-wrapper {
         position: absolute;
         top: 20px;
         width: 100%; /* Adjust as needed */
-        height: auto; /* Or set a specific height */
+        height: 100hv; /* Or set a specific height */
         transition: opacity 0.5s ease, transform 0.5s ease; /* Adjust timing as needed */
     }
 
@@ -86,12 +86,12 @@
     }
 
     .slide-fade-enter-from {
-        transform: translateX(130px);
+        transform: translateX(230px);
         opacity: 0;
     }
     
     .slide-fade-leave-to {
-        transform: translateX(-130px);
+        transform: translateX(-230px);
         opacity: 0;
     }
 </style>
