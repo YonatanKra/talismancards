@@ -104,3 +104,4 @@
     }
 </style>
   
+// TODO::pause slide on hover
