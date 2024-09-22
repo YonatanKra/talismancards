@@ -200,3 +200,7 @@ onMounted(async () => {
   left: 0;
 }
 </style>
+
+
+// TODO::refactor
+// TODO::show the card in a dialog with the "title" in a toggletip
