@@ -115,6 +115,7 @@ onMounted(async () => {
     deck.cards.forEach((card) => {
       card.$el.addEventListener('mousedown', (e) => {
         draggedElement = e.target.parentElement;
+        overrideMouseMoveListener(e);
         window.addEventListener('mousemove', overrideMouseMoveListener);
       });
     });
