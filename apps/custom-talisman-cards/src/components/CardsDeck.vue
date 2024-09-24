@@ -3,6 +3,9 @@
   <vwc-button label="Fan" @click="fan"></vwc-button>
   <vwc-button label="Flip" @click="flip"></vwc-button>
   <div ref="container" id="container"></div>
+  <vwc-dialog ref="dialogElement">
+    <DisplayCard slot="main" :card="currentCard"></DisplayCard>
+  </vwc-dialog>
 </template>
 
 <script setup lang="ts">
@@ -11,6 +14,8 @@ import { listSVGs } from '../components/svgGetter.js';
 
 const cards = ref([]);
 const container = ref<HTMLDivElement | null>(null);
+const dialogElement = ref<HTMLDialogElement | null>(null);
+const currentCard = ref(null);
 
 const deck = Deck(false);
 deck.cards.forEach(function (card, i) {
@@ -52,25 +57,15 @@ function getTransformValuesFromElement(element: HTMLElement) {
         .map((value) => value.trim());
       translateX = parseFloat(translateValues[0]); // Extract translateX
       translateY = parseFloat(translateValues[1]); // Extract translateY
-      console.log('Translate X:', translateX);
-      console.log('Translate Y:', translateY);
-    } else {
-      console.log('No translate found in the transform property.');
     }
 
     if (rotateMatch) {
       rotateValue = rotateMatch[1]; // This will be the value in degrees
-      console.log('Rotation value:', rotateValue); // e.g., "130deg"
 
       // If you want to convert it to a number
-      const rotateDegrees = parseFloat(rotateValue); // This will give you 130
-      console.log('Rotation in degrees:', rotateDegrees);
-    } else {
-      console.log('No rotation found in the transform property.');
+      const rotateDegrees = parseFloat(rotateValue);
     }
     return { translateX, translateY, rotateValue };
-  } else {
-    console.log('No transform applied to the element.');
   }
 }
 
@@ -112,11 +107,18 @@ onMounted(async () => {
       draggedElement = null;
       window.removeEventListener('mousemove', overrideMouseMoveListener);
     });
-    deck.cards.forEach((card) => {
-      card.$el.addEventListener('mousedown', (e) => {
-        draggedElement = e.target.parentElement;
-        overrideMouseMoveListener(e);
-        window.addEventListener('mousemove', overrideMouseMoveListener);
+    deck.cards.forEach((card, i) => {
+      card.$el.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        card.disableFlipping();
+        if (card.side === 'front') {
+          const dialogNativeElement = dialogElement.value;
+          currentCard.value = cards.value[i];
+          if (!dialogNativeElement.open) dialogNativeElement.showModal();
+        }
+        setTimeout(() => {
+          card.enableFlipping();
+        }, 100);
       });
     });
     deck.intro();
@@ -139,6 +141,9 @@ onMounted(async () => {
   transform: translate3d(-50%, -50%, 0);
 }
 
+vwc-dialog {
+  --dialog-min-inline-size: 60%;
+}
 .card {
   position: absolute;
   display: inline-block;
@@ -202,6 +207,5 @@ onMounted(async () => {
 }
 </style>
 
-
-// TODO::refactor
-// TODO::show the card in a dialog with the "title" in a toggletip
+// TODO::refactor // TODO::show the card in a dialog with the "title" in a
+toggletip
