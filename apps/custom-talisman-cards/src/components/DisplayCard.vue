@@ -33,6 +33,6 @@ import { ref } from 'vue';
     .text {
         max-width: 500px;
         direction: rtl; text-align: center;
-        font-size: 2em;
+        font-size: 1.5em;
     }
 </style>

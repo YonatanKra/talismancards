@@ -21,20 +21,41 @@
     let intervalId = setTimeout(() => {});
 
     const nextCard = (next = 1) => {
-        currentCardIndex.value = (currentCardIndex.value + next) % cards.value.length;
+        let value = currentCardIndex.value + next;
+        if (value < 0) {
+            value = cards.value.length - 1;
+        }
+
+        currentCardIndex.value = (value) % cards.value.length;
     };
+
+    function restartSlides() {
+        if (intervalId) clearInterval(intervalId);
+        intervalId = setInterval(nextCard, intervalTime);
+    }
+
+    function stopSlides() {
+        clearInterval(intervalId);
+        intervalId = null;
+    }
 
     function handleKeyDown(e: KeyboardEvent) {
         if (e.key === 'ArrowRight') {
             nextCard();
-        } else if (e.key === 'ArrowLeft') {
+            restartSlides();
+        } 
+        if (e.key === 'ArrowLeft') {
             nextCard(-1);
+            restartSlides();
+        }
+        if (e.key === ' ') {
+            intervalId ? stopSlides() : restartSlides();
         }
     }
-    
-    
 
     onMounted(async () => {
+        document.addEventListener('keydown', handleKeyDown);
+
         try {
             cards.value = await listSVGs();
             intervalId = setInterval(nextCard, intervalTime);
@@ -48,6 +69,7 @@
         if (intervalId) {
             clearInterval(intervalId);
         }
+        document.removeEventListener('keydown', handleKeyDown);
     });
     const route = useRoute();
     const name = route.query.name || 'card';
