@@ -2,6 +2,7 @@
   <vwc-button label="Shuffle" @click="shuffle"></vwc-button>
   <vwc-button label="Fan" @click="fan"></vwc-button>
   <vwc-button label="Flip" @click="flip"></vwc-button>
+  <vwc-button label="Spread" @click="spread"></vwc-button>
   <div ref="container" id="container"></div>
   <vwc-dialog ref="dialogElement">
     <DisplayCard slot="main" :card="currentCard"></DisplayCard>
@@ -22,6 +23,11 @@ deck.cards.forEach(function (card, i) {
   card.enableDragging();
   card.enableFlipping();
 });
+
+function spread() {
+    deck.sort(true);
+    deck.bysuit();
+}
 
 function shuffle() {
   deck.shuffle();

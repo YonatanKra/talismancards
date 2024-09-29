@@ -1,5 +1,6 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { defineEventHandler, readBody, setResponseStatus, assertMethod } from 'h3';
+import { cache } from './get-card';
 
 export default defineEventHandler(async (event) => {
   assertMethod(event, 'POST');
@@ -34,6 +35,7 @@ export default defineEventHandler(async (event) => {
       const command = new PutObjectCommand(params);
       const data = await s3Client.send(command);
       setResponseStatus(event, 200, 'Upload successful');  
+      delete cache[fileName];
       return JSON.stringify({message: 'Upload successful', data});
     } catch (error) {
       console.error('Upload Error', error);

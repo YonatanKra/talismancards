@@ -2,7 +2,7 @@ import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { defineEventHandler, getQuery, createError, setHeader } from "h3";
 
 // In-memory cache object
-const cache = {};
+export const cache = {};
 
 export async function getCard(fileName: string) {
   // Check if the result is already cached
@@ -57,10 +57,6 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Missing fileName parameter'
     });
   }
-
-  // Set caching headers
-  setHeader(event, 'Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
-  setHeader(event, 'Expires', new Date(Date.now() + 3600 * 1000).toUTCString()); // Expires in 1 hour
 
   // Call getCard to retrieve the SVG
   return getCard(fileName as string);

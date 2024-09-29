@@ -1,5 +1,5 @@
 <template>
-    <div class="slideshow" @keydown="handleKeyDown" tabindex="0">
+    <div class="slideshow" tabindex="0">
         <Transition name="slide-fade">
             <div :key="currentCardIndex" class="card-wrapper" v-if="cards.length">
                 <DisplayCard :card="cards[currentCardIndex]" />
