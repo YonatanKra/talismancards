@@ -25,8 +25,8 @@ deck.cards.forEach(function (card, i) {
 });
 
 function spread() {
-    deck.sort(true);
-    deck.bysuit();
+  deck.sort(true);
+  deck.bysuit();
 }
 
 function shuffle() {
@@ -75,14 +75,47 @@ function getTransformValuesFromElement(element: HTMLElement) {
   }
 }
 
+const handleContextMenu = (card) => {
+  return (e?: MouseEvent) => {
+    e?.preventDefault();
+    card.disableFlipping();
+    if (card.side === 'front') {
+      const dialogNativeElement = dialogElement.value;
+      currentCard.value = cards.value[card.i];
+      if (!dialogNativeElement.open) dialogNativeElement.showModal();
+    }
+    setTimeout(() => {
+      card.enableFlipping();
+    }, 100);
+  }
+};
+
 function overrideMouseMoveListener(e: MouseEvent) {
   if (!draggedElement) return;
   const { translateX, translateY, rotateValue } =
     getTransformValuesFromElement(draggedElement);
 
-  draggedElement.style['transform'] = `translate(${translateX / 2}px, ${
-    translateY / 2
-  }px) rotate(${rotateValue})`;
+  draggedElement.style['transform'] = `translate(${translateX / 2}px, ${translateY / 2
+    }px) rotate(${rotateValue})`;
+}
+
+function setTouchHold(card) {
+  const element = card.$el;
+  let tapHoldTimer = null;
+  const tapHold = false;
+  element.addEventListener('touchStart', (e: TouchEvent) => {
+    e.stopImmediatePropagation();
+    e.preventDefault();
+    tapHoldTimer = setTimeout(() => {
+      handleContextMenu(card)();
+    }, 750);
+  });
+
+  element.addEventListener('touchEnd', (e) => {
+    if (tapHold) {
+      clearTimeout(tapHoldTimer);
+    }
+  });
 }
 
 onMounted(async () => {
@@ -98,9 +131,8 @@ onMounted(async () => {
                 }`;
         } else {
           style += `.card.${type}.rank${i} .face {
-                    background-image: url("https://talismancards.s3.us-east-2.amazonaws.com/images/${
-                      cards.value[currentValueIndex++].fileName
-                    }");
+                    background-image: url("https://talismancards.s3.us-east-2.amazonaws.com/images/${cards.value[currentValueIndex++].fileName
+            }");
                 }`;
         }
       }
@@ -113,20 +145,13 @@ onMounted(async () => {
       draggedElement = null;
       window.removeEventListener('mousemove', overrideMouseMoveListener);
     });
+
+
     deck.cards.forEach((card, i) => {
-      card.$el.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        card.disableFlipping();
-        if (card.side === 'front') {
-          const dialogNativeElement = dialogElement.value;
-          currentCard.value = cards.value[i];
-          if (!dialogNativeElement.open) dialogNativeElement.showModal();
-        }
-        setTimeout(() => {
-          card.enableFlipping();
-        }, 100);
-      });
+      card.$el.addEventListener('contextmenu', handleContextMenu(card));
+      setTouchHold(card);
     });
+
     deck.intro();
     shuffle();
   } catch (error) {
@@ -150,6 +175,7 @@ onMounted(async () => {
 vwc-dialog {
   --dialog-min-inline-size: 60%;
 }
+
 .card {
   position: absolute;
   display: inline-block;

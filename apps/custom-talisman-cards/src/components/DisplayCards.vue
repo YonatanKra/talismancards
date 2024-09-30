@@ -17,7 +17,7 @@
 
     const cards = ref([]);
     const currentCardIndex = ref(0);
-    const intervalTime = 5000;
+    const intervalTime = 7500;
     let intervalId = setTimeout(() => {});
 
     const nextCard = (next = 1) => {
